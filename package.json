@@ -1,0 +1,17 @@
+{
+  "name": "pwn-shop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cyber Range: Villain Supply Co. + Mini-SOC",
+  "scripts": {
+    "dev": "npx concurrently -n BACKEND,SHOP,SOC -c red,blue,magenta \"npm run dev:backend\" \"npm run dev:shop\" \"npm run dev:soc\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:shop": "cd frontend-shop && npm run dev",
+    "dev:soc": "cd frontend-soc && npm run dev",
+    "seed": "cd backend && npm run seed",
+    "install:all": "cd backend && npm install && cd ../frontend-shop && npm install && cd ../frontend-soc && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
