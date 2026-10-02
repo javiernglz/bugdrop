@@ -5,12 +5,12 @@
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)
-![CTF](https://img.shields.io/badge/CTF-4_Challenges-FF6B6B)
+![CTF](https://img.shields.io/badge/CTF-5_Challenges-FF6B6B)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 **Un Cyber Range de doble interfaz para aprender pentesting y bug bounty desde cero.**
 
-pwn-shop es un entorno de entrenamiento compuesto por una tienda de e-commerce intencionalmente vulnerable ("Villain Supply Co." - suministros para supervillanos) y un Mini-SOC gamificado que monitorea los ataques en tiempo real.
+pwn-shop es un entorno de entrenamiento compuesto por una tienda de e-commerce intencionalmente vulnerable ("Bugdrop" - tienda exclusiva de figuras art toys de colección) y un Panel de Control gamificado que monitorea los ataques en tiempo real.
 
 ## Arquitectura
 
@@ -22,7 +22,7 @@ graph LR
 
     subgraph "pwn-shop"
         subgraph "Frontend Shop :5173"
-            S[Villain Supply Co.<br/>React + Tailwind]
+            S[Bugdrop Shop<br/>React + CSS Variables]
         end
 
         subgraph "Backend :3000"
@@ -33,7 +33,7 @@ graph LR
         end
 
         subgraph "Frontend SOC :5174"
-            SOC[Mini-SOC<br/>React + Recharts]
+            SOC[Control Center<br/>React + Recharts]
         end
     end
 
@@ -50,11 +50,11 @@ graph LR
 
 | # | Reto | Tipo | Dificultad | Descripcion |
 |---|------|------|-----------|-------------|
-| 1 | Carrito Gratis | Business Logic | Easy | El servidor confía en el precio enviado por el cliente |
-| 2 | XSS del Esbirro | Stored XSS | Medium | Las reseñas se renderizan sin sanitizar |
-| 3 | Planos Secretos | IDOR | Easy | Los pedidos no verifican propiedad |
-| 4 | Bypass de Pago | Auth Bypass | Medium | El pago acepta `{"status":"success"}` sin verificar |
-| 5 | JWT Debil | Crypto | Hard | La clave de firma JWT es `123456` (fuerza bruta offline) |
+| 1 | Manipulación de Carrito | Business Logic | Easy | El servidor confía en el precio enviado por el cliente |
+| 2 | Sesión Robada del Coleccionista | Stored XSS | Medium | Las reseñas se renderizan sin sanitizar |
+| 3 | Fuga de Moldes de Fábrica | IDOR | Easy | Los pedidos no verifican propiedad |
+| 4 | Bypass de Pago VIP | Auth Bypass | Medium | El pago acepta `{"status":"success"}` sin verificar |
+| 5 | Cupón de Administrador | SQL Injection | Easy | Inyección SQL en la suscripción a la newsletter |
 
 Cada vulnerabilidad tiene un sistema de pistas de 2 niveles (teorica y tecnica) accesible desde el Mini-SOC.
 

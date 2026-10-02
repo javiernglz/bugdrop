@@ -8,11 +8,11 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
 
   const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   if (!order) {
-    return res.status(404).json({ error: 'Pedido no encontrado.' });
+    return res.status(404).json({ error: 'Order not found.' });
   }
 
   if (order.payment_status === 'paid') {
-    return res.json({ message: 'Este pedido ya fue pagado. No intentes pagar dos veces, tacaño.' });
+    return res.json({ message: 'This order is already paid.' });
   }
 
   const { status, transaction_id } = req.body;
@@ -28,8 +28,8 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
 
     return res.json({
       message: flag
-        ? `Pago "procesado" por $${order.total_price.toLocaleString()}... pero espera, ¿realmente pagaste? El sistema dice que sí, pero algo huele mal.`
-        : `Pago confirmado. Pedido #${order.id} listo para envío.`,
+        ? `Payment of $${order.total_price.toLocaleString()} "processed"... Wait, did you actually pay? The system accepted it, but something feels off.`
+        : `Payment confirmed. Drop order #${order.id} is ready for shipping.`,
       order_id: order.id,
       payment_status: 'paid',
       total: order.total_price,
@@ -40,14 +40,14 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
 
   if (status === 'pending') {
     return res.json({
-      message: 'Pago pendiente. Esperando confirmación del banco de villanos offshore.',
+      message: 'Payment pending. Waiting for bank confirmation.',
       payment_status: 'pending',
     });
   }
 
   res.status(400).json({
-    error: 'Estado de pago no reconocido. Envía {"status": "success"} para confirmar.',
-    hint: '¿No tienes dinero? Quizás podrías... convencer al sistema de que sí pagaste.',
+    error: 'Unrecognized payment status. Send {"status": "success"} to confirm.',
+    hint: 'No funds? Maybe you can... convince the system you paid.',
   });
 });
 
@@ -56,15 +56,15 @@ router.get('/api/orders/:id/payment-info', (req, res) => {
   const order = db.prepare('SELECT id, total_price, payment_status FROM orders WHERE id = ?').get(req.params.id);
 
   if (!order) {
-    return res.status(404).json({ error: 'Pedido no encontrado.' });
+    return res.status(404).json({ error: 'Order not found.' });
   }
 
   res.json({
     order_id: order.id,
     total: order.total_price,
     payment_status: order.payment_status,
-    payment_methods: ['Tarjeta de Crédito Villana', 'CryptoDoom', 'Transferencia de Guarida'],
-    note: 'Tras seleccionar método, el cliente envía POST /api/orders/:id/pay con el resultado.',
+    payment_methods: ['Apple Pay', 'Credit Card', 'Crypto'],
+    note: 'After selecting method, client sends POST /api/orders/:id/pay with result.',
   });
 });
 

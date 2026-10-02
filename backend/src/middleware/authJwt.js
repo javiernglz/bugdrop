@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../routes/auth');
 
-function getVillainFromToken(req) {
-  const token = req.cookies.villain_session || req.headers.authorization?.replace('Bearer ', '');
+function getUserFromToken(req) {
+  const token = req.cookies.session || req.headers.authorization?.replace('Bearer ', '');
 
   if (!token) return null;
 
@@ -14,14 +14,14 @@ function getVillainFromToken(req) {
 }
 
 function requireAuth(req, res, next) {
-  const villain = getVillainFromToken(req);
+  const user = getUserFromToken(req);
 
-  if (!villain) {
+  if (!user) {
     return res.status(401).json({ error: 'No autenticado. Inicia sesión primero.' });
   }
 
-  req.villain = villain;
+  req.user = user;
   next();
 }
 
-module.exports = { getVillainFromToken, requireAuth };
+module.exports = { getUserFromToken, requireAuth };

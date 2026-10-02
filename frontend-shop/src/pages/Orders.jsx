@@ -1,25 +1,37 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-function formatPrice(price) {
-  return `$${price.toLocaleString('es-MX')}`;
-}
-
-const STATUS_COLORS = {
-  pending: 'text-yellow-500 bg-yellow-900/20 border-yellow-800',
-  confirmed: 'text-blue-400 bg-blue-900/20 border-blue-800',
-  shipped: 'text-purple-400 bg-purple-900/20 border-purple-800',
-  completed: 'text-green-400 bg-green-900/20 border-green-800',
+const IMG = {
+  1:  '/bug-hacker.jpg',
+  2:  '/bug-aviator.jpg',
+  3:  '/bug-robot.jpg',
+  4:  '/bug-firefighter.jpg',
+  5:  '/bug-astronaut.jpg',
+  6:  '/bug-chef.jpg',
+  7:  '/bug-detective.jpg',
+  8:  '/bug-scientist.jpg',
+  9:  '/bug-cowboy.jpg',
+  10: '/bug-samurai.jpg',
+  11: '/bug-wizard.jpg',
+  12: '/bug-mystery.jpg',
 };
 
-const PAYMENT_COLORS = {
-  pending: 'text-yellow-500',
-  paid: 'text-green-400',
+function formatPrice(price) {
+  if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(0)}M`;
+  if (price >= 1_000) return `$${(price / 1_000).toFixed(0)}K`;
+  return `$${price}`;
+}
+
+const STATUS_COLOR = {
+  pending: { color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.1)' },
+  confirmed: { color: '#60a5fa', bg: 'rgba(96, 165, 250, 0.1)' },
+  shipped: { color: '#a78bfa', bg: 'rgba(167, 139, 250, 0.1)' },
+  completed: { color: '#34d399', bg: 'rgba(52, 211, 153, 0.1)' },
 };
 
 export default function Orders() {
-  const { villain } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -27,11 +39,11 @@ export default function Orders() {
   const [payResult, setPayResult] = useState(null);
 
   useEffect(() => {
-    if (!villain) return navigate('/login');
+    if (!user) return navigate('/login');
     fetch('/api/orders', { credentials: 'include' })
       .then(r => r.json())
       .then(data => setOrders(data.orders));
-  }, [villain, navigate]);
+  }, [user, navigate]);
 
   async function viewOrder(orderId) {
     setSelectedOrder(orderId);
@@ -57,51 +69,61 @@ export default function Orders() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
-      <h2 className="text-2xl font-bold text-gray-200 mb-6">Mis Pedidos</h2>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 24px' }}>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text)', marginBottom: '32px' }}>
+        My Collection
+      </h2>
 
       {orders.length === 0 ? (
-        <div className="text-center py-16">
-          <span className="text-5xl block mb-4">📦</span>
-          <p className="text-gray-500 mb-4">No tienes pedidos aún.</p>
-          <Link to="/" className="text-red-400 text-sm hover:underline">
-            Ir al catálogo
+        <div style={{ textAlign: 'center', padding: '80px 0' }}>
+          <span style={{ fontSize: '3rem', opacity: 0.2, display: 'block', marginBottom: '16px' }}>📦</span>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px' }}>
+            No drops collected yet.
+          </p>
+          <Link to="/" style={{ fontSize: '13px', color: 'var(--text)', textDecoration: 'underline' }}>
+            Explore the catalog
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <h3 className="text-xs text-gray-500 uppercase tracking-wider mb-2">Tus pedidos</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {orders.map(order => (
               <button
                 key={order.id}
                 onClick={() => viewOrder(order.id)}
-                className={`w-full text-left bg-[#16213e] rounded-lg border p-4 transition ${
-                  selectedOrder === order.id
-                    ? 'border-red-700'
-                    : 'border-gray-800 hover:border-gray-700'
-                }`}
+                style={{
+                  width: '100%', textAlign: 'left',
+                  backgroundColor: 'var(--bg-card)',
+                  border: `1px solid ${selectedOrder === order.id ? 'var(--text)' : 'var(--border)'}`,
+                  borderRadius: '16px',
+                  padding: '20px',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s ease'
+                }}
               >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-200">
-                    Pedido #{order.id}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)' }}>
+                    Drop #{order.id}
                   </span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border ${STATUS_COLORS[order.status] || ''}`}>
+                  <span style={{
+                    fontSize: '11px', padding: '4px 8px', borderRadius: '999px',
+                    backgroundColor: STATUS_COLOR[order.status]?.bg || 'var(--border)',
+                    color: STATUS_COLOR[order.status]?.color || 'var(--text)'
+                  }}>
                     {order.status}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
-                    {new Date(order.created_at).toLocaleDateString('es-MX')}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-faint)' }}>
+                    {new Date(order.created_at).toLocaleDateString()}
                   </span>
-                  <span className="text-sm text-red-400 font-medium">
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)' }}>
                     {formatPrice(order.total_price)}
                   </span>
                 </div>
-                <div className="mt-1">
-                  <span className={`text-[10px] ${PAYMENT_COLORS[order.payment_status] || 'text-gray-500'}`}>
-                    Pago: {order.payment_status}
-                  </span>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: order.payment_status === 'paid' ? '#34d399' : '#fbbf24' }}>
+                  Payment: {order.payment_status}
                 </div>
               </button>
             ))}
@@ -109,57 +131,71 @@ export default function Orders() {
 
           <div>
             {orderDetail ? (
-              <div className="bg-[#16213e] rounded-lg border border-gray-800 p-4 sticky top-24">
-                <h3 className="text-sm font-bold text-gray-200 mb-3">
-                  Detalle del Pedido #{orderDetail.order.id}
+              <div style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                borderRadius: '24px',
+                padding: '32px',
+                position: 'sticky',
+                top: '96px'
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text)', marginBottom: '24px' }}>
+                  Details for Drop #{orderDetail.order.id}
                 </h3>
 
                 {orderDetail.hacked_message && (
-                  <div className="bg-red-900/20 border border-red-800 rounded-lg p-3 mb-3 text-xs text-red-300">
-                    <p className="font-medium">{orderDetail.hacked_message}</p>
+                  <div style={{
+                    backgroundColor: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)',
+                    borderRadius: '12px', padding: '16px', marginBottom: '24px', color: 'var(--text)'
+                  }}>
+                    <p style={{ fontSize: '13px', fontWeight: 500 }}>{orderDetail.hacked_message}</p>
                     {orderDetail.flag && (
-                      <p className="font-mono text-yellow-400 mt-2">{orderDetail.flag}</p>
+                      <p style={{ fontFamily: 'monospace', color: '#fbbf24', marginTop: '8px', fontSize: '12px' }}>
+                        {orderDetail.flag}
+                      </p>
                     )}
                   </div>
                 )}
 
-                <div className="text-xs text-gray-500 mb-3">
-                  <span>Propietario: {orderDetail.order.display_name}</span>
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                  <span style={{ display: 'block', marginBottom: '4px' }}>Collector: <strong style={{ color: 'var(--text)' }}>{orderDetail.order.display_name}</strong></span>
                 </div>
 
                 {orderDetail.order.notes && (
-                  <div className="bg-black/20 rounded-lg p-3 mb-3 text-xs text-gray-400">
-                    <span className="text-gray-500 block mb-1">Notas:</span>
+                  <div style={{ backgroundColor: 'var(--bg-input)', borderRadius: '12px', padding: '16px', marginBottom: '24px', fontSize: '13px', color: 'var(--text)' }}>
+                    <span style={{ color: 'var(--text-faint)', display: 'block', marginBottom: '4px', fontSize: '11px', textTransform: 'uppercase' }}>Notes</span>
                     {orderDetail.order.notes}
                   </div>
                 )}
 
-                <div className="space-y-2 mb-4">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
                   {orderDetail.items.map(item => (
-                    <div key={item.id} className="flex items-center gap-2 text-xs">
-                      <div className="w-6 h-6 shrink-0 rounded overflow-hidden">
+                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'var(--bg-input)' }}>
                         <img
-                          src={{
-                            1: '/hero.jpg', 2: '/shark.jpg', 3: '/uniforms.jpg',
-                            4: '/volcano.jpg', 5: '/monologue.jpg', 6: '/cat.jpg',
-                            7: '/satellite.jpg', 8: '/sub.jpg', 9: '/mind_control.jpg',
-                            10: '/trap.jpg'
-                          }[item.product_id] || '/hero.jpg'}
+                          src={IMG[item.product_id] || '/bug-placeholder.jpg'}
                           alt={item.product_name}
-                          className="w-full h-full object-cover pixelated"
-                          style={{ imageRendering: 'pixelated' }}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onError={e => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
                         />
+                         <div style={{
+                          display: 'none', position: 'absolute', inset: 0,
+                          alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-input)'
+                        }}>🐛</div>
                       </div>
-                      <span className="text-gray-300 flex-1">{item.product_name}</span>
-                      <span className="text-gray-500">x{item.quantity}</span>
-                      <span className="text-gray-400">{formatPrice(item.unit_price)}</span>
+                      <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)' }}>{item.product_name}</span>
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>x{item.quantity}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>{formatPrice(item.unit_price)}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="border-t border-gray-800 pt-3 flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Total</span>
-                  <span className="text-lg font-bold text-red-400">
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Total</span>
+                  <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)' }}>
                     {formatPrice(orderDetail.order.total_price)}
                   </span>
                 </div>
@@ -167,28 +203,33 @@ export default function Orders() {
                 {orderDetail.order.payment_status === 'pending' && (
                   <button
                     onClick={() => payOrder(orderDetail.order.id)}
-                    className="w-full mt-4 bg-green-800 hover:bg-green-700 text-white text-xs py-2.5 rounded-lg transition"
+                    style={{
+                      width: '100%', backgroundColor: 'var(--accent)', color: 'var(--accent-text)',
+                      border: 'none', padding: '14px', borderRadius: '12px', fontSize: '13px',
+                      fontWeight: 500, cursor: 'pointer', marginTop: '24px'
+                    }}
                   >
-                    Pagar Ahora
+                    Complete Payment
                   </button>
                 )}
 
                 {payResult && (
-                  <div className={`mt-3 rounded-lg border p-3 text-xs ${
-                    payResult.flag
-                      ? 'bg-red-900/20 border-red-800 text-red-300'
-                      : 'bg-green-900/20 border-green-800 text-green-300'
-                  }`}>
+                  <div style={{
+                    marginTop: '16px', borderRadius: '12px', padding: '16px', fontSize: '12px',
+                    backgroundColor: payResult.flag ? 'rgba(239, 68, 68, 0.05)' : 'rgba(34, 197, 94, 0.05)',
+                    border: `1px solid ${payResult.flag ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)'}`,
+                    color: 'var(--text)'
+                  }}>
                     <p>{payResult.message}</p>
                     {payResult.flag && (
-                      <p className="font-mono text-yellow-400 mt-1">{payResult.flag}</p>
+                      <p style={{ fontFamily: 'monospace', color: '#fbbf24', marginTop: '4px' }}>{payResult.flag}</p>
                     )}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center text-gray-600 py-16 text-sm">
-                Selecciona un pedido para ver detalles
+              <div style={{ textAlign: 'center', color: 'var(--text-faint)', padding: '80px 0', fontSize: '14px' }}>
+                Select a drop to view details
               </div>
             )}
           </div>

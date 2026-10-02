@@ -16,20 +16,20 @@ router.post('/api/sys/reset', (req, res) => {
     if (io) {
       io.emit('system-event', {
         type: 'reset',
-        message: 'Base de datos restaurada al estado original.',
+        message: 'Database restored to its original state.',
         timestamp: new Date().toISOString(),
       });
     }
 
     res.json({
       success: true,
-      message: 'Base de datos reseteada. Todos los datos restaurados al estado original.',
+      message: 'Database reset. All data restored to its original state.',
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Error al resetear la base de datos.',
+      message: 'Failed to reset the database.',
       error: err.message,
     });
   }
@@ -39,7 +39,7 @@ router.get('/api/sys/status', (req, res) => {
   const db = req.app.get('db');
 
   const counts = {
-    villains: db.prepare('SELECT count(*) as c FROM villains').get().c,
+    users: db.prepare('SELECT count(*) as c FROM users').get().c,
     products: db.prepare('SELECT count(*) as c FROM products').get().c,
     orders: db.prepare('SELECT count(*) as c FROM orders').get().c,
     reviews: db.prepare('SELECT count(*) as c FROM reviews').get().c,
@@ -52,6 +52,44 @@ router.get('/api/sys/status', (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
+});
+
+router.post('/api/newsletter', (req, res) => {
+  const db = req.app.get('db');
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email required' });
+  }
+
+  // VULN: Basic SQL Injection in the newsletter form
+  // An attacker can input: admin' OR '1'='1
+  try {
+    // We intentionally do a raw query string concat
+    const result = db.prepare(`SELECT * FROM users WHERE username = '${email}'`).get();
+    
+    // If the query magically returns the admin user due to SQLi:
+    if (result && result.role === 'admin') {
+      const flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('sqli_newsletter');
+      return res.json({ 
+        message: 'Subscribed as admin? That is unexpected.', 
+        coupon: 'ADMIN-DROP-100',
+        flag: flag ? flag.flag_value : undefined
+      });
+    }
+
+    res.json({
+      message: 'Subscribed successfully! Use code BUGDROP10 at checkout.',
+      coupon: 'BUGDROP10'
+    });
+  } catch (err) {
+    // Leaks the SQL error to make the vulnerability obvious
+    res.status(500).json({ 
+      error: 'Database error', 
+      details: err.message,
+      hint: 'Your email looks a bit... malformed.'
+    });
+  }
 });
 
 module.exports = router;

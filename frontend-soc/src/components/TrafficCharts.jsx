@@ -4,15 +4,13 @@ import {
   PieChart, Pie, Cell,
 } from 'recharts';
 
-const DONUT_COLORS = ['#22c55e', '#ef4444'];
-
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#111128] border border-gray-700 rounded-lg px-3 py-2 text-[10px] shadow-lg">
-      <p className="text-gray-400 mb-1">{label}</p>
+    <div style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px', fontSize: '11px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '4px' }}>{label}</p>
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }}>
+        <p key={i} style={{ color: p.color, margin: 0 }}>
           {p.name}: {p.value}
         </p>
       ))}
@@ -46,10 +44,10 @@ export default function TrafficCharts({ logs }) {
   const donutData = useMemo(() => {
     const threats = logs.filter(l => l.hasThreat).length;
     const safe = logs.length - threats;
-    if (logs.length === 0) return [{ name: 'Sin datos', value: 1 }];
+    if (logs.length === 0) return [{ name: 'No Data', value: 1 }];
     return [
-      { name: 'Seguro', value: safe },
-      { name: 'Malicioso', value: threats },
+      { name: 'Safe', value: safe },
+      { name: 'Threats', value: threats },
     ];
   }, [logs]);
 
@@ -58,95 +56,96 @@ export default function TrafficCharts({ logs }) {
     : 0;
 
   return (
-    <div className="bg-[#111128] rounded-xl border border-gray-800 p-4">
-      <h3 className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-3">
-        Tráfico en Tiempo Real
+    <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px', padding: '20px' }}>
+      <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '24px' }}>
+        Network Traffic Analysis
       </h3>
 
-      <div className="grid grid-cols-5 gap-3">
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
         {/* Line/Area chart — peticiones por minuto */}
-        <div className="col-span-3">
-          <p className="text-[9px] text-gray-500 mb-1">Peticiones / minuto (últimos 10 min)</p>
-          <ResponsiveContainer width="100%" height={100}>
-            <AreaChart data={timeSeriesData} margin={{ top: 2, right: 4, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="gradRequests" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="gradThreats" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                dataKey="time"
-                tick={{ fontSize: 8, fill: '#4b5563' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 8, fill: '#4b5563' }}
-                axisLine={false}
-                tickLine={false}
-                allowDecimals={false}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="requests"
-                name="Peticiones"
-                stroke="#a855f7"
-                fill="url(#gradRequests)"
-                strokeWidth={2}
-              />
-              <Area
-                type="monotone"
-                dataKey="threats"
-                name="Amenazas"
-                stroke="#ef4444"
-                fill="url(#gradThreats)"
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px' }}>Requests per minute (Last 10 min)</p>
+          <div style={{ height: '140px', width: '100%' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={timeSeriesData} margin={{ top: 2, right: 4, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradRequests" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#1a1a1a" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#1a1a1a" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradThreats" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  dataKey="time"
+                  tick={{ fontSize: 10, fill: 'var(--text-faint)' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 10, fill: 'var(--text-faint)' }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="requests"
+                  name="Requests"
+                  stroke="#1a1a1a"
+                  fill="url(#gradRequests)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="threats"
+                  name="Threats"
+                  stroke="#ef4444"
+                  fill="url(#gradThreats)"
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Donut — seguro vs malicioso */}
-        <div className="col-span-2 flex flex-col items-center justify-center">
-          <p className="text-[9px] text-gray-500 mb-1">Seguro vs Malicioso</p>
-          <div className="relative">
-            <ResponsiveContainer width={90} height={90}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px' }}>Traffic Integrity</p>
+          <div style={{ position: 'relative', height: '120px', width: '120px' }}>
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={donutData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={28}
-                  outerRadius={40}
+                  innerRadius={36}
+                  outerRadius={56}
                   paddingAngle={3}
                   dataKey="value"
                   stroke="none"
                 >
-                  {donutData.map((_, i) => (
-                    <Cell key={i} fill={DONUT_COLORS[i] || '#374151'} />
-                  ))}
+                  <Cell fill="#1a1a1a" />
+                  <Cell fill="#ef4444" />
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
               </PieChart>
             </ResponsiveContainer>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className={`text-sm font-bold font-mono ${threatPct > 30 ? 'text-red-400' : 'text-green-400'}`}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '16px', fontWeight: 600, color: threatPct > 30 ? 'var(--error)' : 'var(--text)' }}>
                 {threatPct}%
               </span>
             </div>
           </div>
-          <div className="flex gap-3 mt-1 text-[8px]">
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Seguro
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px', fontSize: '10px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#1a1a1a' }} /> Safe
             </span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Malicioso
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#ef4444' }} /> Threat
             </span>
           </div>
         </div>

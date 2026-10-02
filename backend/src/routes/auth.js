@@ -4,17 +4,17 @@ const router = Router();
 
 // VULNERABILIDAD: Clave JWT extremadamente débil e intencional.
 // Un atacante puede hacer fuerza bruta offline con herramientas como hashcat/john
-// y forjar un token de admin (Dr. Maligno).
+// y forjar un token de admin (The Creator).
 const JWT_SECRET = '123456';
 const JWT_EXPIRY = '24h';
 
-function signToken(villain) {
+function signToken(user) {
   return jwt.sign(
     {
-      id: villain.id,
-      username: villain.username,
-      display_name: villain.display_name,
-      role: villain.role,
+      id: user.id,
+      username: user.username,
+      display_name: user.display_name,
+      role: user.role,
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRY, algorithm: 'HS256' }
@@ -26,61 +26,61 @@ router.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ error: 'Se requiere usuario y contraseña' });
+    return res.status(400).json({ error: 'Username and password required' });
   }
 
-  const villain = db.prepare(
-    'SELECT id, username, display_name, role, bio FROM villains WHERE username = ? AND password = ?'
+  const user = db.prepare(
+    'SELECT id, username, display_name, role, bio FROM users WHERE username = ? AND password = ?'
   ).get(username, password);
 
-  if (!villain) {
-    return res.status(401).json({ error: 'Credenciales incorrectas. ¿Eres realmente un villano?' });
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid credentials. Are you really a collector?' });
   }
 
-  const token = signToken(villain);
+  const token = signToken(user);
 
-  res.cookie('villain_session', token, { httpOnly: false, sameSite: 'lax' });
+  res.cookie('session', token, { httpOnly: false, sameSite: 'lax' });
 
   res.json({
-    message: `Bienvenido de vuelta, ${villain.display_name}`,
+    message: `Welcome back, ${user.display_name}`,
     token,
-    villain: {
-      id: villain.id,
-      username: villain.username,
-      display_name: villain.display_name,
-      role: villain.role,
-      bio: villain.bio,
+    user: {
+      id: user.id,
+      username: user.username,
+      display_name: user.display_name,
+      role: user.role,
+      bio: user.bio,
     },
   });
 });
 
 router.get('/api/auth/me', (req, res) => {
-  const token = req.cookies.villain_session || req.headers.authorization?.replace('Bearer ', '');
+  const token = req.cookies.session || req.headers.authorization?.replace('Bearer ', '');
 
   if (!token) {
-    return res.status(401).json({ error: 'No autenticado' });
+    return res.status(401).json({ error: 'Not authenticated' });
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     const db = req.app.get('db');
-    const villain = db.prepare(
-      'SELECT id, username, display_name, role, bio FROM villains WHERE id = ?'
+    const user = db.prepare(
+      'SELECT id, username, display_name, role, bio FROM users WHERE id = ?'
     ).get(decoded.id);
 
-    if (!villain) {
-      return res.status(401).json({ error: 'Usuario no encontrado' });
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
     }
 
-    res.json({ villain });
+    res.json({ user });
   } catch (err) {
-    return res.status(401).json({ error: 'Token inválido o expirado' });
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 });
 
 router.post('/api/auth/logout', (_req, res) => {
-  res.clearCookie('villain_session');
-  res.json({ message: 'Sesión cerrada. Hasta la próxima, villano.' });
+  res.clearCookie('session');
+  res.json({ message: 'Session closed. Keep collecting.' });
 });
 
 module.exports = router;

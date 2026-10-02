@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const VILLAIN_ACCOUNTS = [
-  { username: 'minion_42', password: 'esbirro2024', hint: 'Esbirro #42 — El empleado del mes' },
-  { username: 'lady_caos', password: 'chaos666', hint: 'Lady Caos — Ex-meteoróloga' },
-  { username: 'prof_doom', password: 'doom1234', hint: 'Profesor Doom — Ingeniero nuclear' },
-  { username: 'hacker_fantasma', password: 'ghost_in_shell', hint: 'El Fantasma Digital — Hacker misterioso' },
+const COLLECTOR_ACCOUNTS = [
+  { username: 'minion_42', password: 'esbirro2024', hint: 'Collector #42 — Verified Buyer' },
+  { username: 'lady_caos', password: 'chaos666', hint: 'Lady Caos — Early Adopter' },
+  { username: 'prof_doom', password: 'doom1234', hint: 'Prof. Doom — Bulk Buyer' },
+  { username: 'hacker_fantasma', password: 'ghost_in_shell', hint: 'The Ghost — Anonymous Collector' },
 ];
 
 export default function Login() {
@@ -34,79 +34,158 @@ export default function Login() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-6 py-16">
-      <div className="bg-[#16213e] rounded-xl border border-gray-800 p-8">
-        <div className="text-center mb-8">
-          <span className="text-5xl block mb-3">🦹</span>
-          <h2 className="text-2xl font-bold text-red-400">Portal de Villanos</h2>
-          <p className="text-xs text-gray-500 mt-1">Accede con tus credenciales de villano</p>
+    <div style={{ width: '100%', maxWidth: '440px', margin: '0 auto', padding: '80px 24px' }}>
+      
+      <div style={{
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: '24px',
+        padding: '40px 32px'
+      }}>
+        
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '16px' }}>🐛</span>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.02em', marginBottom: '8px' }}>
+            Collector Access
+          </h2>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+            Sign in to manage your drops and collection.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Usuario</label>
+            <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 500 }}>
+              Collector ID
+            </label>
             <input
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-red-500 focus:outline-none"
-              placeholder="tu_alias_villano"
+              placeholder="e.g. collector_89"
+              style={{
+                width: '100%',
+                backgroundColor: 'var(--bg-input)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                fontSize: '14px',
+                color: 'var(--text)',
+                outline: 'none',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={e => e.target.style.borderColor = 'var(--text)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
           </div>
+          
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Contraseña</label>
+            <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 500 }}>
+              Passcode
+            </label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-red-500 focus:outline-none"
               placeholder="••••••••"
+              style={{
+                width: '100%',
+                backgroundColor: 'var(--bg-input)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                fontSize: '14px',
+                color: 'var(--text)',
+                outline: 'none',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={e => e.target.style.borderColor = 'var(--text)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
           </div>
 
           {error && (
-            <div className="bg-red-900/20 border border-red-800 rounded-lg px-3 py-2 text-xs text-red-400">
+            <div style={{
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              borderRadius: '12px',
+              padding: '12px',
+              fontSize: '13px',
+              color: '#ef4444'
+            }}>
               {error}
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full bg-red-800 hover:bg-red-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
+            style={{
+              width: '100%',
+              backgroundColor: 'var(--accent)',
+              color: 'var(--accent-text)',
+              border: 'none',
+              padding: '14px',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              marginTop: '8px',
+              transition: 'opacity 0.2s ease'
+            }}
+            onMouseEnter={e => e.target.style.opacity = '0.8'}
+            onMouseLeave={e => e.target.style.opacity = '1'}
           >
-            Entrar a la Guarida
+            Access Collection
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-800">
+        <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
           <button
             onClick={() => setShowAccounts(!showAccounts)}
-            className="w-full text-xs text-gray-500 hover:text-gray-400 transition"
+            style={{
+              width: '100%',
+              background: 'none',
+              border: 'none',
+              fontSize: '12px',
+              color: 'var(--text-faint)',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
           >
-            {showAccounts ? 'Ocultar' : 'Mostrar'} cuentas de prueba
+            {showAccounts ? 'Hide' : 'Show'} test accounts (CTF)
           </button>
 
           {showAccounts && (
-            <div className="mt-3 space-y-2">
-              {VILLAIN_ACCOUNTS.map(acc => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+              {COLLECTOR_ACCOUNTS.map(acc => (
                 <button
                   key={acc.username}
                   onClick={() => quickLogin(acc)}
-                  className="w-full text-left bg-black/20 hover:bg-black/40 border border-gray-800 rounded-lg px-3 py-2 transition"
+                  style={{
+                    textAlign: 'left',
+                    backgroundColor: 'var(--bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onMouseEnter={e => e.target.style.borderColor = 'var(--text)'}
+                  onMouseLeave={e => e.target.style.borderColor = 'var(--border)'}
                 >
-                  <div className="text-xs text-gray-300">{acc.hint}</div>
-                  <div className="text-[10px] text-gray-600 mt-0.5">
+                  <div style={{ fontSize: '12px', color: 'var(--text)', fontWeight: 500 }}>{acc.hint}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-faint)', marginTop: '4px' }}>
                     {acc.username} / {acc.password}
                   </div>
                 </button>
               ))}
-              <p className="text-[10px] text-gray-600 text-center mt-2">
-                Nota: La cuenta de Dr. Maligno (admin) no está aquí.
-                ¿Podrías conseguir acceso de otra forma?
+              <p style={{ fontSize: '11px', color: 'var(--text-faint)', textAlign: 'center', marginTop: '12px' }}>
+                Note: The admin account (The Creator) is not here. Can you gain access some other way?
               </p>
             </div>
           )}
         </div>
+
       </div>
     </div>
   );

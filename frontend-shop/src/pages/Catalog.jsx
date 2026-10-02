@@ -2,22 +2,50 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const CATEGORIES = [
-  { key: '', label: '[ SYS.ALL ]' },
-  { key: 'armas', label: '[ W3AP0NS ]' },
-  { key: 'mascotas', label: '[ B3ASTS ]' },
-  { key: 'guaridas', label: '[ L41RS ]' },
-  { key: 'tecnología', label: '[ T3CH ]' },
-  { key: 'uniformes', label: '[ G3AR ]' },
-  { key: 'accesorios', label: '[ M1SC ]' },
-  { key: 'vehículos', label: '[ R1D3S ]' },
-  { key: 'seguridad', label: '[ S3CUR1TY ]' },
+  { key: '', label: 'All' },
+  { key: 'series-01', label: 'Series 01' },
+  { key: 'limited', label: 'Limited' },
+  { key: 'secret', label: 'Secret' },
 ];
 
+// Image map — will be replaced with clay renders
+const IMG = {
+  1:  '/bug-hacker.jpg',
+  2:  '/bug-aviator.jpg',
+  3:  '/bug-robot.jpg',
+  4:  '/bug-firefighter.jpg',
+  5:  '/bug-astronaut.jpg',
+  6:  '/bug-chef.jpg',
+  7:  '/bug-detective.jpg',
+  8:  '/bug-scientist.jpg',
+  9:  '/bug-cowboy.jpg',
+  10: '/bug-samurai.jpg',
+  11: '/bug-wizard.jpg',
+  12: '/bug-mystery.jpg',
+};
+
+const RARITY_COLOR = {
+  'Common':     { bg: '#f0f0f0', text: '#6b6b6b', dark_bg: '#2a2a2a', dark_text: '#8a8a8a' },
+  'Rare':       { bg: '#e8f4ff', text: '#2563eb', dark_bg: '#1e3a5f', dark_text: '#60a5fa' },
+  'Ultra Rare': { bg: '#f5e8ff', text: '#7c3aed', dark_bg: '#3b1f5f', dark_text: '#a78bfa' },
+  'Secret':     { bg: '#fff8e8', text: '#b45309', dark_bg: '#3d2800', dark_text: '#fbbf24' },
+};
+
 function formatPrice(price) {
-  if (price >= 1_000_000_000) return `$${(price / 1_000_000_000).toFixed(0)}B`;
   if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(0)}M`;
   if (price >= 1_000) return `$${(price / 1_000).toFixed(0)}K`;
   return `$${price}`;
+}
+
+function RarityBadge({ rarity }) {
+  const colors = RARITY_COLOR[rarity] || RARITY_COLOR['Common'];
+  return (
+    <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '999px',
+                   backgroundColor: colors.bg, color: colors.text }}
+          className="font-medium tracking-wide">
+      {rarity}
+    </span>
+  );
 }
 
 export default function Catalog() {
@@ -35,76 +63,119 @@ export default function Catalog() {
   }, [category]);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold text-red-500 mb-2">
-          Catálogo de Suministros Villanos
-        </h2>
-        <p className="text-gray-500">
-          Todo lo que necesitas para tu plan de dominación mundial. Envío discreto en helicóptero negro.
+    <div style={{ width: '100%', maxWidth: '1100px', margin: '0 auto', padding: '64px 24px' }}>
+
+      {/* ═══ HERO ═══ */}
+      <div style={{ marginBottom: '64px', textAlign: 'center' }}>
+        <p style={{ color: 'var(--text-faint)', fontSize: '11px', letterSpacing: '0.14em',
+                    textTransform: 'uppercase', marginBottom: '12px', fontWeight: 500 }}>
+          Series 01 — Now Available
+        </p>
+        <h1 style={{ color: 'var(--text)', fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 700,
+                     letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+          Meet the Bugs.
+        </h1>
+        <p style={{ color: 'var(--text-muted)', maxWidth: '460px', margin: '16px auto 0',
+                    fontSize: '14px', lineHeight: 1.7 }}>
+          Collectible art figures, each one unique. Open a blind box and discover which Bug joins your display.
+          Common, Rare, or the elusive Secret Bug.
         </p>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2 mb-8">
+      {/* ═══ CATEGORY FILTER ═══ */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    gap: '8px', marginBottom: '48px', flexWrap: 'wrap' }}>
         {CATEGORIES.map(cat => (
           <button
             key={cat.key}
             onClick={() => setCategory(cat.key)}
-            className={`px-4 py-1.5 font-mono text-xs tracking-wider border transition-all ${
-              category === cat.key
-                ? 'bg-cyan-900/30 text-cyan-300 border-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.5)]'
-                : 'bg-black/50 text-gray-500 border-gray-800 hover:text-cyan-400 hover:border-cyan-800'
-            }`}
+            style={{
+              padding: '6px 18px',
+              borderRadius: '999px',
+              fontSize: '13px',
+              border: '1px solid var(--border)',
+              backgroundColor: category === cat.key ? 'var(--accent)' : 'transparent',
+              color: category === cat.key ? 'var(--accent-text)' : 'var(--text-muted)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontFamily: 'inherit',
+            }}
           >
             {cat.label}
           </button>
         ))}
       </div>
 
+      {/* ═══ PRODUCT GRID ═══ */}
       {loading ? (
-        <div className="text-center text-gray-500 py-20">Cargando arsenal...</div>
+        <div style={{ color: 'var(--text-faint)', textAlign: 'center', padding: '80px 0', fontSize: '14px' }}>
+          Loading collection...
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '24px' }}>
           {products.map(product => (
             <Link
               key={product.id}
               to={`/products/${product.id}`}
-              className="group bg-[#16213e] rounded-xl border border-gray-800 hover:border-red-900/50 transition overflow-hidden"
+              className="group block"
+              style={{ textDecoration: 'none' }}
             >
-              <div className="h-40 bg-gradient-to-br from-gray-900 to-[#1a1a2e] flex items-center justify-center text-6xl group-hover:scale-110 transition duration-300 overflow-hidden">
+              {/* Image */}
+              <div style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                aspectRatio: '1 / 1',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '12px',
+                transition: 'border-color 0.2s ease',
+                position: 'relative',
+              }}
+              >
                 <img
-                  src={{
-                    1: '/hero.jpg', 2: '/shark.jpg', 3: '/uniforms.jpg',
-                    4: '/volcano.jpg', 5: '/monologue.jpg', 6: '/cat.jpg',
-                    7: '/satellite.jpg', 8: '/sub.jpg', 9: '/mind_control.jpg',
-                    10: '/trap.jpg'
-                  }[product.id] || '/hero.jpg'}
+                  src={IMG[product.id] || '/bug-placeholder.jpg'}
                   alt={product.name}
-                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-300 pixelated"
-                  style={{ imageRendering: 'pixelated' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover',
+                           transition: 'transform 0.4s ease' }}
+                  className="group-hover:scale-105"
+                  onError={e => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
                 />
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="text-sm font-semibold text-gray-200 group-hover:text-red-400 transition leading-tight">
-                    {product.name}
-                  </h3>
-                  {product.featured === 1 && (
-                    <span className="shrink-0 text-[10px] bg-yellow-900/30 text-yellow-500 border border-yellow-800/50 px-1.5 py-0.5 rounded-full">
-                      DESTACADO
-                    </span>
-                  )}
+                {/* Fallback placeholder */}
+                <div style={{
+                  display: 'none',
+                  position: 'absolute', inset: 0,
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  background: 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg) 100%)',
+                }}>
+                  <span style={{ fontSize: '2rem', opacity: 0.4 }}>🐛</span>
+                  <span style={{ fontSize: '10px', color: 'var(--text-faint)', letterSpacing: '0.08em' }}>
+                    COMING SOON
+                  </span>
                 </div>
-                <p className="text-xs text-gray-500 line-clamp-2 mb-3">
-                  {product.description}
+              </div>
+
+              {/* Info */}
+              <div className="px-1">
+                <p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500,
+                            marginBottom: '4px', lineHeight: 1.3 }}>
+                  {product.name}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-red-400">
+                  <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
                     {formatPrice(product.price)}
                   </span>
-                  <span className="text-[10px] text-gray-600">
-                    Stock: {product.stock}
-                  </span>
+                  {product.featured === 1 && (
+                    <RarityBadge rarity="Secret" />
+                  )}
                 </div>
               </div>
             </Link>

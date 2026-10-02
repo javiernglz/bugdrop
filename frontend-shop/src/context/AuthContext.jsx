@@ -3,14 +3,14 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [villain, setVillain] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/auth/me', { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (data?.villain) setVillain(data.villain);
+        if (data?.user) setUser(data.user);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -25,17 +25,17 @@ export function AuthProvider({ children }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    setVillain(data.villain);
+    setUser(data.user);
     return data;
   }
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    setVillain(null);
+    setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ villain, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

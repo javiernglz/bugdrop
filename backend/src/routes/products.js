@@ -30,13 +30,13 @@ router.get('/api/products/:id', (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
 
   if (!product) {
-    return res.status(404).json({ error: 'Producto no encontrado. Quizás fue destruido por un rayo.' });
+    return res.status(404).json({ error: 'Drop not found. It might have been pulled from the collection.' });
   }
 
   const reviews = db.prepare(`
     SELECT r.*, v.display_name, v.username
     FROM reviews r
-    JOIN villains v ON v.id = r.villain_id
+    JOIN users v ON v.id = r.user_id
     WHERE r.product_id = ?
     ORDER BY r.created_at DESC
   `).all(req.params.id);

@@ -3,19 +3,36 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
+const IMG = {
+  1:  '/bug-hacker.jpg',
+  2:  '/bug-aviator.jpg',
+  3:  '/bug-robot.jpg',
+  4:  '/bug-firefighter.jpg',
+  5:  '/bug-astronaut.jpg',
+  6:  '/bug-chef.jpg',
+  7:  '/bug-detective.jpg',
+  8:  '/bug-scientist.jpg',
+  9:  '/bug-cowboy.jpg',
+  10: '/bug-samurai.jpg',
+  11: '/bug-wizard.jpg',
+  12: '/bug-mystery.jpg',
+};
+
 function formatPrice(price) {
-  return `$${price.toLocaleString('es-MX')}`;
+  if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(0)}M`;
+  if (price >= 1_000) return `$${(price / 1_000).toFixed(0)}K`;
+  return `$${price}`;
 }
 
 export default function Cart() {
-  const { villain } = useAuth();
+  const { user } = useAuth();
   const { items, total, clearCart, removeFromCart, updateQuantity } = useCart();
   const navigate = useNavigate();
   const [checkoutResult, setCheckoutResult] = useState(null);
   const [processing, setProcessing] = useState(false);
 
   async function handleCheckout() {
-    if (!villain) return navigate('/login');
+    if (!user) return navigate('/login');
     setProcessing(true);
 
     const res = await fetch('/api/cart/checkout', {
@@ -38,102 +55,186 @@ export default function Cart() {
 
   if (items.length === 0 && !checkoutResult) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-20 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto block mb-4 filter drop-shadow-[0_0_12px_rgba(236,72,153,0.8)]"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-        <h2 className="text-xl font-bold text-gray-300 mb-2">Carrito vacío</h2>
-        <p className="text-sm text-gray-500 mb-6">
-          Un villano sin carrito es solo un ciudadano con mala actitud.
+      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '100px 24px', textAlign: 'center' }}>
+        <span style={{ fontSize: '3rem', opacity: 0.2, display: 'block', marginBottom: '16px' }}>📦</span>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)', marginBottom: '8px' }}>
+          Your Box is Empty
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '32px' }}>
+          Every great collection starts with a single Bug.
         </p>
         <Link
           to="/"
-          className="inline-block bg-red-800 hover:bg-red-700 text-white text-sm px-6 py-2.5 rounded-lg transition"
+          style={{
+            display: 'inline-block',
+            backgroundColor: 'var(--accent)',
+            color: 'var(--accent-text)',
+            padding: '12px 24px',
+            borderRadius: '999px',
+            fontSize: '13px',
+            fontWeight: 500,
+            transition: 'opacity 0.2s ease',
+            textDecoration: 'none'
+          }}
+          onMouseEnter={e => e.target.style.opacity = '0.8'}
+          onMouseLeave={e => e.target.style.opacity = '1'}
         >
-          Explorar Catálogo
+          Explore Drops
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
-      <h2 className="text-2xl font-bold text-gray-200 mb-6">Carrito de Compras</h2>
+    <div style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 24px' }}>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text)', marginBottom: '32px' }}>
+        My Box
+      </h2>
 
       {checkoutResult ? (
-        <div className={`rounded-xl border p-6 text-center ${
-          checkoutResult.flag
-            ? 'bg-red-900/20 border-red-800'
-            : 'bg-green-900/20 border-green-800'
-        }`}>
-          <span className="text-5xl block mb-4">{checkoutResult.flag ? '🚨' : '✅'}</span>
-          <p className="text-sm text-gray-200 mb-2">{checkoutResult.message}</p>
+        <div style={{
+          backgroundColor: checkoutResult.flag ? 'rgba(239, 68, 68, 0.05)' : 'rgba(34, 197, 94, 0.05)',
+          border: '1px solid',
+          borderColor: checkoutResult.flag ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)',
+          borderRadius: '16px',
+          padding: '40px 24px',
+          textAlign: 'center'
+        }}>
+          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>
+            {checkoutResult.flag ? '🚨' : '📦'}
+          </span>
+          <p style={{ fontSize: '14px', color: 'var(--text)', marginBottom: '8px', fontWeight: 500 }}>
+            {checkoutResult.message}
+          </p>
           {checkoutResult.flag && (
-            <p className="font-mono text-yellow-400 text-lg mt-4 bg-black/30 inline-block px-4 py-2 rounded-lg">
+            <p style={{
+              fontFamily: 'monospace',
+              color: '#fbbf24',
+              backgroundColor: 'var(--bg-input)',
+              display: 'inline-block',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              marginTop: '16px',
+              fontSize: '13px'
+            }}>
               {checkoutResult.flag}
             </p>
           )}
-          <div className="mt-6">
+          <div style={{ marginTop: '24px' }}>
             {checkoutResult.order_id && (
               <Link
                 to={`/orders`}
-                className="text-xs text-gray-400 hover:text-gray-200 transition"
+                style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'underline' }}
               >
-                Ver mis pedidos &rarr;
+                View My Collection &rarr;
               </Link>
             )}
           </div>
           <button
             onClick={() => setCheckoutResult(null)}
-            className="mt-4 text-xs text-gray-500 hover:text-gray-300 transition"
+            style={{
+              marginTop: '24px',
+              background: 'none',
+              border: 'none',
+              fontSize: '13px',
+              color: 'var(--text-faint)',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
           >
-            Seguir comprando
+            Continue browsing
           </button>
         </div>
       ) : (
         <>
-          <div className="space-y-3 mb-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
             {items.map(item => (
               <div
                 key={item.product_id}
-                className="flex items-center gap-4 bg-[#16213e] rounded-lg border border-gray-800 p-4"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '12px',
+                  padding: '12px'
+                }}
               >
-                <div className="w-16 h-16 shrink-0 rounded overflow-hidden">
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  flexShrink: 0,
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  backgroundColor: 'var(--bg-input)',
+                  border: '1px solid var(--border)',
+                  position: 'relative'
+                }}>
                   <img
-                    src={{
-                      1: '/hero.jpg', 2: '/shark.jpg', 3: '/uniforms.jpg',
-                      4: '/volcano.jpg', 5: '/monologue.jpg', 6: '/cat.jpg',
-                      7: '/satellite.jpg', 8: '/sub.jpg', 9: '/mind_control.jpg',
-                      10: '/trap.jpg'
-                    }[item.product_id] || '/hero.jpg'}
+                    src={IMG[item.product_id] || '/bug-placeholder.jpg'}
                     alt={item.name}
-                    className="w-full h-full object-cover pixelated"
-                    style={{ imageRendering: 'pixelated' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={e => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
                   />
+                  <div style={{
+                    display: 'none',
+                    position: 'absolute', inset: 0,
+                    alignItems: 'center', justifyContent: 'center',
+                    backgroundColor: 'var(--bg-input)',
+                  }}>
+                    <span style={{ opacity: 0.3, fontSize: '20px' }}>🐛</span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-gray-200 truncate">{item.name}</h3>
-                  <p className="text-xs text-gray-500">{formatPrice(item.unit_price)} c/u</p>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {item.name}
+                  </h3>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    {formatPrice(item.unit_price)}
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button
                     onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
-                    className="w-6 h-6 rounded bg-gray-800 text-gray-400 hover:bg-gray-700 text-xs transition"
+                    style={{
+                      width: '28px', height: '28px', borderRadius: '6px',
+                      backgroundColor: 'var(--bg-input)', border: '1px solid var(--border)',
+                      color: 'var(--text)', fontSize: '12px', cursor: 'pointer'
+                    }}
                   >
                     -
                   </button>
-                  <span className="text-sm text-gray-300 w-6 text-center">{item.quantity}</span>
+                  <span style={{ fontSize: '13px', color: 'var(--text)', width: '20px', textAlign: 'center' }}>
+                    {item.quantity}
+                  </span>
                   <button
                     onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
-                    className="w-6 h-6 rounded bg-gray-800 text-gray-400 hover:bg-gray-700 text-xs transition"
+                    style={{
+                      width: '28px', height: '28px', borderRadius: '6px',
+                      backgroundColor: 'var(--bg-input)', border: '1px solid var(--border)',
+                      color: 'var(--text)', fontSize: '12px', cursor: 'pointer'
+                    }}
                   >
                     +
                   </button>
                 </div>
-                <span className="text-sm font-medium text-red-400 w-24 text-right">
+
+                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)', width: '80px', textAlign: 'right' }}>
                   {formatPrice(item.unit_price * item.quantity)}
                 </span>
+
                 <button
                   onClick={() => removeFromCart(item.product_id)}
-                  className="text-gray-600 hover:text-red-400 transition text-sm"
+                  style={{
+                    background: 'none', border: 'none', fontSize: '14px',
+                    color: 'var(--text-faint)', cursor: 'pointer', padding: '0 8px'
+                  }}
                 >
                   ✕
                 </button>
@@ -141,24 +242,44 @@ export default function Cart() {
             ))}
           </div>
 
-          <div className="bg-[#16213e] rounded-lg border border-gray-800 p-4 mb-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Total</span>
-              <span className="text-2xl font-bold text-red-400">{formatPrice(total)}</span>
-            </div>
+          <div style={{
+            backgroundColor: 'var(--bg)',
+            borderTop: '1px solid var(--border)',
+            paddingTop: '24px',
+            marginBottom: '24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Total estimated</span>
+            <span style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text)' }}>
+              {formatPrice(total)}
+            </span>
           </div>
 
           <button
             onClick={handleCheckout}
             disabled={processing}
-            className="w-full bg-red-800 hover:bg-red-700 disabled:bg-gray-700 text-white py-3 rounded-lg text-sm font-medium transition"
+            style={{
+              width: '100%',
+              backgroundColor: 'var(--accent)',
+              color: 'var(--accent-text)',
+              border: 'none',
+              padding: '16px',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: processing ? 'not-allowed' : 'pointer',
+              opacity: processing ? 0.7 : 1,
+              transition: 'opacity 0.2s ease'
+            }}
           >
-            {processing ? 'Procesando...' : 'Confirmar Pedido'}
+            {processing ? 'Processing...' : 'Checkout'}
           </button>
 
-          {!villain && (
-            <p className="text-center text-xs text-gray-500 mt-3">
-              Debes <Link to="/login" className="text-red-400 hover:underline">iniciar sesión</Link> para comprar
+          {!user && (
+            <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)', marginTop: '16px' }}>
+              You must <Link to="/login" style={{ color: 'var(--text)', textDecoration: 'underline' }}>sign in</Link> to checkout.
             </p>
           )}
         </>

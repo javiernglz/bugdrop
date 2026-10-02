@@ -1,82 +1,204 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useState, useEffect } from 'react';
+
+function SunIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  );
+}
 
 export default function Layout({ children }) {
-  const { villain, logout } = useAuth();
+  const { user, logout } = useAuth();
   const { count } = useCart();
   const location = useLocation();
+
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('bugdrop-theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('bugdrop-theme', dark ? 'dark' : 'light');
+  }, [dark]);
+
+  const isActive = (to) => location.pathname === to;
 
   const navLink = (to, label) => (
     <Link
       to={to}
-      className={`hover:text-red-400 transition ${location.pathname === to ? 'text-red-400' : 'text-gray-400'}`}
+      style={{ color: isActive(to) ? 'var(--text)' : 'var(--text-muted)' }}
+      className="text-sm hover:opacity-70 transition-opacity"
     >
       {label}
     </Link>
   );
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] text-gray-200 flex flex-col">
-      <header className="bg-black/90 backdrop-blur-md border-b-2 border-pink-600/50 px-6 py-4 sticky top-0 z-50 shadow-[0_0_15px_rgba(219,39,119,0.3)]">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="cyan" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="filter drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]"><path d="M9 4.26v1.39M15 4.26v1.39"/><path d="M5.5 12.08c-.7-.37-1.12-1.02-1.12-1.74V9.2c0-2.32 3.4-4.2 7.62-4.2s7.62 1.88 7.62 4.2v1.14c0 .72-.42 1.37-1.12 1.74"/><path d="M12 16v.01"/><path d="M8 19h8"/><path d="M9 19v-3"/><path d="M15 19v-3"/><path d="M12 19v-3"/><path d="M9 22h6"/><path d="M10 22v-3"/><path d="M14 22v-3"/></svg>
-            <div>
-              <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-cyan-400 tracking-wider uppercase drop-shadow-md">
-                VILLAIN SUPPLY CO.
-              </h1>
-              <p className="text-[10px] text-cyan-500/80 uppercase tracking-widest font-mono">
-                Dominación mundial desde 1984
-              </p>
-            </div>
+    <div style={{ backgroundColor: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column' }}>
+
+      {/* ═══ HEADER ═══ */}
+      <header style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg)' }}
+              className="px-6 py-4 sticky top-0 z-50 backdrop-blur-sm">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+
+          <Link to="/" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text)' }}>
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+              <path d="M12 8v4l3 3"/>
+              <path d="M8 12c0-2.21 1.79-4 4-4"/>
+            </svg>
+            <span style={{ color: 'var(--text)' }} className="text-sm font-medium tracking-wide">
+              Bugdrop
+            </span>
           </Link>
 
-          <nav className="flex items-center gap-6 text-sm">
-            {navLink('/', 'Catálogo')}
-            {villain && navLink('/orders', 'Mis Pedidos')}
+          <nav className="flex items-center gap-6">
+            {navLink('/', 'Drops')}
+            {user && navLink('/orders', 'My Collection')}
             <Link
               to="/cart"
-              className={`relative hover:text-red-400 transition ${location.pathname === '/cart' ? 'text-red-400' : 'text-gray-400'}`}
+              style={{ color: isActive('/cart') ? 'var(--text)' : 'var(--text-muted)' }}
+              className="relative text-sm hover:opacity-70 transition-opacity"
             >
-              Carrito
+              My Box
               {count > 0 && (
-                <span className="absolute -top-2 -right-4 bg-red-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                <span style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}
+                      className="absolute -top-1.5 -right-3.5 text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-medium">
                   {count}
                 </span>
               )}
             </Link>
-            {villain ? (
+
+            {user ? (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-500">
-                  {villain.display_name}
-                  {villain.role === 'admin' && (
-                    <span className="ml-1 text-yellow-500">[Jefe]</span>
-                  )}
+                <span style={{ color: 'var(--text-faint)' }} className="text-xs">
+                  {user.display_name}
                 </span>
-                <button
-                  onClick={logout}
-                  className="text-xs text-gray-500 hover:text-red-400 transition"
-                >
-                  Salir
+                <button onClick={logout} style={{ color: 'var(--text-muted)' }}
+                        className="text-xs hover:opacity-70 transition-opacity">
+                  Sign out
                 </button>
               </div>
             ) : (
-              navLink('/login', 'Iniciar Sesión')
+              navLink('/login', 'Collector Login')
             )}
+
+            {/* Theme toggle */}
+            <button
+              onClick={() => setDark(d => !d)}
+              style={{ color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: '6px' }}
+              className="p-1.5 hover:opacity-70 transition-opacity"
+              aria-label="Toggle theme"
+            >
+              {dark ? <SunIcon /> : <MoonIcon />}
+            </button>
           </nav>
         </div>
       </header>
 
-      <main className="flex-1">
+      <main style={{ flex: 1 }}>
         {children}
       </main>
 
-      <footer className="text-center text-xs text-gray-600 py-6 border-t border-gray-800/50">
-        <p>Villain Supply Co. &copy; 2024 — "El mal nunca duerme, pero sí hace envíos gratis"</p>
-        <p className="mt-1 text-gray-700">
-          [Entorno CTF educativo — Todas las vulnerabilidades son intencionales]
-        </p>
+      {/* ═══ FOOTER / NEWSLETTER ═══ */}
+      <footer style={{
+        borderTop: '1px solid var(--border)',
+        backgroundColor: 'var(--bg)',
+        padding: '64px 24px',
+        marginTop: 'auto'
+      }}>
+        <div style={{
+          maxWidth: '1100px',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '48px'
+        }}>
+          <div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)', marginBottom: '8px' }}>
+              Subscribe and get 10% off
+            </h3>
+            <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px' }}>
+              Receive news, exclusive drops and much more.
+            </p>
+            <form
+              onSubmit={async e => {
+                e.preventDefault();
+                const email = e.target.email.value;
+                try {
+                  const res = await fetch('/api/newsletter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                  });
+                  const data = await res.json();
+                  if (data.flag) {
+                    alert(`Flag Found!\n${data.message}\nCoupon: ${data.coupon}\nFLAG: ${data.flag}`);
+                  } else if (data.error) {
+                    alert(`Error: ${data.details}\n${data.hint}`);
+                  } else {
+                    alert(data.message);
+                  }
+                  e.target.reset();
+                } catch (err) {
+                  alert('Failed to subscribe.');
+                }
+              }}
+              style={{ display: 'flex', borderBottom: '1px solid var(--text)', paddingBottom: '8px', maxWidth: '400px' }}
+            >
+              <input
+                type="text"
+                name="email"
+                placeholder="EMAIL ADDRESS"
+                required
+                style={{
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: '12px',
+                  letterSpacing: '0.05em',
+                  color: 'var(--text)',
+                  textTransform: 'uppercase'
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text)',
+                  cursor: 'pointer',
+                  fontSize: '16px'
+                }}
+              >
+                &rarr;
+              </button>
+            </form>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>BUGDROP</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-faint)' }}>Collect the unexpected.</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-faint)', opacity: 0.5, marginTop: '8px' }}>
+              [CTF Environment — Intentional Vulnerabilities]
+            </span>
+          </div>
+        </div>
       </footer>
     </div>
   );

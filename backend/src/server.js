@@ -38,9 +38,9 @@ app.set('io', io);
 app.set('db', db);
 
 io.on('connection', (socket) => {
-  console.log(`[SOC] Monitor conectado: ${socket.id}`);
+  console.log(`[SOC] Monitor connected: ${socket.id}`);
   socket.on('disconnect', () => {
-    console.log(`[SOC] Monitor desconectado: ${socket.id}`);
+    console.log(`[SOC] Monitor disconnected: ${socket.id}`);
   });
 });
 
@@ -58,8 +58,8 @@ app.use(systemRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'operational',
-    name: 'Villain Supply Co.',
-    tagline: 'Tu proveedor de confianza para la dominación mundial',
+    name: 'Bugdrop',
+    tagline: 'Collect the unexpected.',
   });
 });
 
@@ -67,9 +67,9 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`
   ╔══════════════════════════════════════════════╗
-  ║   🦹 VILLAIN SUPPLY CO. — Backend activo    ║
-  ║   Puerto: ${PORT}                              ║
-  ║   "La dominación mundial empieza aquí"      ║
+  ║   📦 BUGDROP — Backend active                ║
+  ║   Port: ${PORT}                                 ║
+  ║   "Collect the unexpected"                   ║
   ╚══════════════════════════════════════════════╝
   `);
 });

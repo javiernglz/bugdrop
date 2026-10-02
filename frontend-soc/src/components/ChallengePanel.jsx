@@ -1,136 +1,65 @@
-import { useState } from 'react';
-
-const DIFFICULTY_STYLES = {
-  easy: 'bg-green-900/30 text-green-400 border-green-800',
-  medium: 'bg-yellow-900/30 text-yellow-400 border-yellow-800',
-  hard: 'bg-red-900/30 text-red-400 border-red-800',
-};
-
-const CHALLENGE_EMOJIS = {
-  cart_manipulation: '🛒',
-  stored_xss: '💉',
-  idor_orders: '🔓',
-  payment_bypass: '💳',
-};
-
 export default function ChallengePanel({ challenges, solved, hints, onGetHint }) {
-  const [openChallenge, setOpenChallenge] = useState(null);
-  const [loadingHint, setLoadingHint] = useState(null);
-
-  async function handleHint(key, level) {
-    setLoadingHint(`${key}-${level}`);
-    await onGetHint(key, level);
-    setLoadingHint(null);
+  if (!challenges || challenges.length === 0) {
+    return (
+      <div style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: 'var(--bg-card)', color: 'var(--text-muted)', fontSize: '13px' }}>
+        No challenges loaded.
+      </div>
+    );
   }
 
   return (
-    <div className="bg-[#111128] rounded-xl border border-gray-800 p-4">
-      <h3 className="text-sm font-bold text-purple-400 mb-4 uppercase tracking-wider">
-        Retos CTF
-      </h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {challenges.map((chal) => {
+        const isSolved = (solved || []).includes(chal.key);
+        // hints is an object keyed by `${challengeKey}-${level}`
+        const hasHint = !!(hints && hints[`${chal.key}-1`]);
 
-      <div className="space-y-2">
-        {challenges.map(ch => {
-          const isSolved = solved.includes(ch.challenge_key);
-          const isOpen = openChallenge === ch.challenge_key;
-          const hint1 = hints[`${ch.challenge_key}-1`];
-          const hint2 = hints[`${ch.challenge_key}-2`];
-
-          return (
-            <div key={ch.challenge_key}>
-              <button
-                onClick={() => setOpenChallenge(isOpen ? null : ch.challenge_key)}
-                className={`w-full text-left rounded-lg px-3 py-2.5 transition border ${
-                  isSolved
-                    ? 'bg-green-900/20 border-green-800/50'
-                    : 'bg-black/30 border-gray-800 hover:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">
-                      {isSolved ? '🏆' : (CHALLENGE_EMOJIS[ch.challenge_key] || '🎯')}
-                    </span>
-                    <span className={`text-xs font-medium ${isSolved ? 'text-green-400' : 'text-gray-300'}`}>
-                      {ch.title}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${DIFFICULTY_STYLES[ch.difficulty] || ''}`}>
-                      {ch.difficulty}
-                    </span>
-                    {isSolved ? (
-                      <span className="text-green-400 text-xs">✓</span>
-                    ) : (
-                      <span className="text-gray-600 text-xs">{isOpen ? '▼' : '▶'}</span>
-                    )}
-                  </div>
-                </div>
-              </button>
-
-              {isOpen && (
-                <div className="mt-1 ml-2 bg-black/20 rounded-lg p-3 border border-gray-800/50 space-y-3">
-                  <p className="text-[11px] text-gray-400 leading-relaxed">{ch.description}</p>
-
-                  {isSolved && (
-                    <div className="bg-green-900/20 rounded-lg p-2 text-[10px] text-green-300 text-center font-bold">
-                      COMPLETADO
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <div>
-                      <button
-                        onClick={() => handleHint(ch.challenge_key, 1)}
-                        disabled={!!hint1}
-                        className={`text-[10px] px-2.5 py-1 rounded transition ${
-                          hint1
-                            ? 'text-gray-500 cursor-default'
-                            : 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50 border border-orange-800/50'
-                        }`}
-                      >
-                        {loadingHint === `${ch.challenge_key}-1`
-                          ? 'Cargando...'
-                          : hint1
-                            ? '💡 Pista 1 (desbloqueada)'
-                            : '💡 Pista 1 — Teórica'}
-                      </button>
-                      {hint1 && (
-                        <p className="text-[10px] text-orange-300/80 mt-1.5 pl-2 border-l border-orange-800/50 leading-relaxed">
-                          {hint1.hint}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <button
-                        onClick={() => handleHint(ch.challenge_key, 2)}
-                        disabled={!!hint2}
-                        className={`text-[10px] px-2.5 py-1 rounded transition ${
-                          hint2
-                            ? 'text-gray-500 cursor-default'
-                            : 'bg-red-900/30 text-red-400 hover:bg-red-900/50 border border-red-800/50'
-                        }`}
-                      >
-                        {loadingHint === `${ch.challenge_key}-2`
-                          ? 'Cargando...'
-                          : hint2
-                            ? '🔧 Pista 2 (desbloqueada)'
-                            : '🔧 Pista 2 — Técnica'}
-                      </button>
-                      {hint2 && (
-                        <p className="text-[10px] text-red-300/80 mt-1.5 pl-2 border-l border-red-800/50 leading-relaxed">
-                          {hint2.hint}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+        return (
+          <div key={chal.key} style={{
+            padding: '16px',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            backgroundColor: isSolved ? 'var(--bg)' : 'var(--bg-card)',
+            opacity: isSolved ? 0.6 : 1,
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {isSolved && (
+              <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '4px', backgroundColor: 'var(--success)' }} />
+            )}
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <h4 style={{ fontSize: '14px', fontWeight: 600, margin: 0, textDecoration: isSolved ? 'line-through' : 'none' }}>
+                {chal.title}
+              </h4>
+              <span style={{ fontSize: '10px', textTransform: 'uppercase', padding: '2px 6px', border: '1px solid var(--border)', borderRadius: '4px' }}>
+                {chal.difficulty}
+              </span>
             </div>
-          );
-        })}
-      </div>
+            
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.4 }}>
+              {chal.description}
+            </p>
+            
+            {!isSolved && (
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
+                {hasHint ? (
+                  <div style={{ fontSize: '12px', color: 'var(--warning)', backgroundColor: 'var(--bg)', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                    <strong>Hint:</strong> {hints[`${chal.key}-1`]?.hint || 'No hint available.'}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => onGetHint(chal.key, 1)}
+                    style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    Reveal Hint (-5 pts)
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -16,7 +16,7 @@ router.post('/api/ctf/submit', (req, res) => {
   const { flag } = req.body;
 
   if (!flag || !flag.trim()) {
-    return res.status(400).json({ error: 'Envía una bandera, agente.' });
+    return res.status(400).json({ error: 'Submit a flag to verify your finding.' });
   }
 
   const match = db.prepare('SELECT * FROM flags WHERE flag_value = ?').get(flag.trim());
@@ -26,13 +26,13 @@ router.post('/api/ctf/submit', (req, res) => {
       correct: true,
       challenge: match.title,
       challenge_key: match.challenge_key,
-      message: `BANDERA CORRECTA: "${match.title}" completado. Eres un verdadero hacker.`,
+      message: `FLAG ACCEPTED: "${match.title}" completed. Nice work, hacker.`,
     });
   }
 
   res.json({
     correct: false,
-    message: 'Bandera incorrecta. Sigue intentando, aspirante a pentester.',
+    message: 'Incorrect flag. Keep digging, aspiring pentester.',
   });
 });
 
@@ -43,7 +43,7 @@ router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
   const challenge = db.prepare('SELECT * FROM flags WHERE challenge_key = ?').get(challengeKey);
 
   if (!challenge) {
-    return res.status(404).json({ error: 'Reto no encontrado.' });
+    return res.status(404).json({ error: 'Challenge not found.' });
   }
 
   const hintLevel = parseInt(level, 10);
@@ -52,7 +52,7 @@ router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
     return res.json({
       challenge: challenge.title,
       level: 1,
-      type: 'Pista Teórica',
+      type: 'Conceptual Hint',
       hint: challenge.hints_level1,
     });
   }
@@ -61,12 +61,12 @@ router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
     return res.json({
       challenge: challenge.title,
       level: 2,
-      type: 'Pista Técnica',
+      type: 'Technical Hint',
       hint: challenge.hints_level2,
     });
   }
 
-  res.status(400).json({ error: 'Nivel de pista inválido. Usa 1 (teórica) o 2 (técnica).' });
+  res.status(400).json({ error: 'Invalid hint level. Use 1 (conceptual) or 2 (technical).' });
 });
 
 module.exports = router;

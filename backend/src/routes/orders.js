@@ -4,33 +4,33 @@ const router = Router();
 
 router.get('/api/orders', requireAuth, (req, res) => {
   const db = req.app.get('db');
-  const villain = req.villain;
+  const user = req.user;
 
   const orders = db.prepare(`
     SELECT o.*, v.display_name
     FROM orders o
-    JOIN villains v ON v.id = o.villain_id
-    WHERE o.villain_id = ?
+    JOIN users v ON v.id = o.user_id
+    WHERE o.user_id = ?
     ORDER BY o.created_at DESC
-  `).all(villain.id);
+  `).all(user.id);
 
   res.json({ orders });
 });
 
-// VULN: IDOR — no verifica que el pedido pertenezca al usuario autenticado
+// VULN: IDOR — does not verify the order belongs to the authenticated user
 router.get('/api/orders/:id', requireAuth, (req, res) => {
   const db = req.app.get('db');
-  const villain = req.villain;
+  const user = req.user;
 
   const order = db.prepare(`
     SELECT o.*, v.display_name, v.username
     FROM orders o
-    JOIN villains v ON v.id = o.villain_id
+    JOIN users v ON v.id = o.user_id
     WHERE o.id = ?
   `).get(req.params.id);
 
   if (!order) {
-    return res.status(404).json({ error: 'Pedido no encontrado.' });
+    return res.status(404).json({ error: 'Order not found.' });
   }
 
   const items = db.prepare(`
@@ -41,7 +41,7 @@ router.get('/api/orders/:id', requireAuth, (req, res) => {
   `).all(req.params.id);
 
   let flag = null;
-  if (order.villain_id === 1 && villain.id !== 1) {
+  if (order.user_id === 1 && user.id !== 1) {
     flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('idor_orders');
   }
 
@@ -50,7 +50,7 @@ router.get('/api/orders/:id', requireAuth, (req, res) => {
     items,
     flag: flag ? flag.flag_value : undefined,
     hacked_message: flag
-      ? `Acabas de acceder a los documentos ULTRA SECRETOS de ${order.display_name}! Eso no debería ser posible...`
+      ? `You just accessed ${order.display_name}'s TOP SECRET order details! That should not be possible...`
       : undefined,
   });
 });

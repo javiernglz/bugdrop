@@ -1,7 +1,7 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', '..', 'villain_supply.db');
+const DB_PATH = path.join(__dirname, '..', '..', 'bugdrop.db');
 
 function getDb() {
   const db = new Database(DB_PATH);
@@ -12,12 +12,12 @@ function getDb() {
 
 function initTables(db) {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS villains (
+    CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       display_name TEXT NOT NULL,
-      role TEXT DEFAULT 'villain',
+      role TEXT DEFAULT 'collector',
       bio TEXT,
       session_token TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -36,13 +36,13 @@ function initTables(db) {
 
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      villain_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
       status TEXT DEFAULT 'pending',
       payment_status TEXT DEFAULT 'pending',
       total_price REAL DEFAULT 0,
       notes TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (villain_id) REFERENCES villains(id)
+      FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
     CREATE TABLE IF NOT EXISTS order_items (
@@ -57,12 +57,12 @@ function initTables(db) {
 
     CREATE TABLE IF NOT EXISTS reviews (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      villain_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
       product_id INTEGER NOT NULL,
       content TEXT NOT NULL,
       rating INTEGER DEFAULT 5,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (villain_id) REFERENCES villains(id),
+      FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (product_id) REFERENCES products(id)
     );
 

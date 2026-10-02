@@ -1,16 +1,33 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
+const IMG = {
+  1:  '/bug-hacker.jpg',
+  2:  '/bug-aviator.jpg',
+  3:  '/bug-robot.jpg',
+  4:  '/bug-firefighter.jpg',
+  5:  '/bug-astronaut.jpg',
+  6:  '/bug-chef.jpg',
+  7:  '/bug-detective.jpg',
+  8:  '/bug-scientist.jpg',
+  9:  '/bug-cowboy.jpg',
+  10: '/bug-samurai.jpg',
+  11: '/bug-wizard.jpg',
+  12: '/bug-mystery.jpg',
+};
+
 function formatPrice(price) {
-  return `$${price.toLocaleString('es-MX')}`;
+  if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(0)}M`;
+  if (price >= 1_000) return `$${(price / 1_000).toFixed(0)}K`;
+  return `$${price}`;
 }
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { villain } = useAuth();
+  const { user } = useAuth(); // Keeps the 'user' variable name for auth context compatibility
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -37,7 +54,7 @@ export default function ProductDetail() {
 
   async function handleReview(e) {
     e.preventDefault();
-    if (!villain) return navigate('/login');
+    if (!user) return navigate('/login');
 
     const res = await fetch(`/api/products/${id}/reviews`, {
       method: 'POST',
@@ -55,90 +72,129 @@ export default function ProductDetail() {
   }
 
   if (!product) {
-    return <div className="text-center text-gray-500 py-20">Cargando producto...</div>;
+    return <div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-faint)', fontSize: '14px' }}>Loading...</div>;
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '64px 24px' }}>
+      
       <button
         onClick={() => navigate('/')}
-        className="text-xs text-gray-500 hover:text-gray-300 mb-6 inline-block transition"
+        style={{
+          background: 'none', border: 'none', color: 'var(--text-muted)',
+          fontSize: '13px', cursor: 'pointer', marginBottom: '32px',
+          display: 'inline-flex', alignItems: 'center', gap: '8px'
+        }}
       >
-        &larr; Volver al catálogo
+        &larr; Back to Drops
       </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        <div className="bg-gradient-to-br from-gray-900 to-[#16213e] rounded-xl flex items-center justify-center text-8xl h-72 border border-gray-800 overflow-hidden">
+      {/* ═══ PRODUCT HEADER ═══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '48px', marginBottom: '64px' }}>
+        
+        {/* Image */}
+        <div style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '24px',
+          overflow: 'hidden',
+          aspectRatio: '1 / 1',
+          position: 'relative'
+        }}>
           <img
-            src={{
-              1: '/hero.jpg', 2: '/shark.jpg', 3: '/uniforms.jpg',
-              4: '/volcano.jpg', 5: '/monologue.jpg', 6: '/cat.jpg',
-              7: '/satellite.jpg', 8: '/sub.jpg', 9: '/mind_control.jpg',
-              10: '/trap.jpg'
-            }[product.id] || '/hero.jpg'}
+            src={IMG[product.id] || '/bug-placeholder.jpg'}
             alt={product.name}
-            className="w-full h-full object-cover pixelated"
-            style={{ imageRendering: 'pixelated' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={e => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
           />
+          <div style={{
+            display: 'none', position: 'absolute', inset: 0,
+            flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            background: 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg) 100%)',
+          }}>
+            <span style={{ fontSize: '3rem', opacity: 0.4 }}>🐛</span>
+          </div>
         </div>
 
-        <div>
-          <span className="text-[10px] uppercase tracking-wider text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded-full">
-            {product.category}
+        {/* Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <span style={{
+            display: 'inline-block', fontSize: '11px', fontWeight: 500, letterSpacing: '0.1em',
+            textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '12px'
+          }}>
+            {product.category === 'secret' ? 'Secret Drop' : 'Series 01'}
           </span>
-          <h2 className="text-2xl font-bold text-gray-100 mt-3 mb-2">{product.name}</h2>
-          <p className="text-sm text-gray-400 mb-6 leading-relaxed">{product.description}</p>
+          
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.1, marginBottom: '16px', letterSpacing: '-0.02em' }}>
+            {product.name}
+          </h1>
+          
+          <p style={{ fontSize: '15px', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '32px' }}>
+            {product.description}
+          </p>
 
-          <div className="flex items-end gap-3 mb-6">
-            <span className="text-3xl font-bold text-red-400">{formatPrice(product.price)}</span>
-            <span className="text-xs text-gray-600 mb-1">Stock: {product.stock} unidades</span>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', marginBottom: '32px' }}>
+            <span style={{ fontSize: '2rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1 }}>
+              {formatPrice(product.price)}
+            </span>
+            <span style={{ fontSize: '13px', color: 'var(--text-faint)', marginBottom: '4px' }}>
+              {product.stock} units left
+            </span>
           </div>
 
           <button
             onClick={handleAddToCart}
-            className={`w-full py-3 rounded-lg text-sm font-medium transition ${
-              added
-                ? 'bg-green-800 text-green-200'
-                : 'bg-red-800 hover:bg-red-700 text-white'
-            }`}
+            style={{
+              width: '100%',
+              backgroundColor: added ? 'var(--bg-card)' : 'var(--accent)',
+              color: added ? 'var(--text)' : 'var(--accent-text)',
+              border: added ? '1px solid var(--border)' : 'none',
+              padding: '16px',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
           >
-            {added ? 'Añadido al carrito' : 'Añadir al Carrito'}
+            {added ? 'Added to Box' : 'Add to Box'}
           </button>
-
-          {product.id === 1 && (
-            <p className="text-[10px] text-yellow-600 mt-2 text-center">
-              * Requiere licencia de destrucción masiva nivel 5 (no verificamos)
-            </p>
-          )}
         </div>
       </div>
 
-      {/* Sección de reseñas — VULNERABLE: renderiza HTML sin sanitizar */}
-      <div className="border-t border-gray-800 pt-8">
-        <h3 className="text-lg font-semibold text-gray-200 mb-6">
-          Reseñas de Villanos ({reviews.length})
+      {/* ═══ REVIEWS SECTION (VULNERABLE) ═══ */}
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '48px' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)', marginBottom: '24px' }}>
+          Collector Reviews ({reviews.length})
         </h3>
 
         {reviews.length === 0 ? (
-          <p className="text-sm text-gray-500 mb-8">
-            Ningún villano ha opinado todavía. Sé el primero en contar tu experiencia.
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '32px' }}>
+            No reviews yet. Be the first to review this drop.
           </p>
         ) : (
-          <div className="space-y-4 mb-8">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
             {reviews.map(review => (
-              <div key={review.id} className="bg-[#16213e] rounded-lg border border-gray-800 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-gray-300">
-                    {review.display_name}
-                    <span className="text-gray-600 ml-2">@{review.username}</span>
+              <div key={review.id} style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                padding: '20px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>
+                    {review.display_name} <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>@{review.username}</span>
                   </span>
-                  <span className="text-xs text-yellow-500">
+                  <span style={{ fontSize: '12px', color: '#fbbf24', letterSpacing: '0.1em' }}>
                     {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
                   </span>
                 </div>
-                {/* VULN: dangerouslySetInnerHTML — no sanitiza el contenido */}
+                {/* VULN: dangerouslySetInnerHTML — no sanitiza el contenido, permite XSS */}
                 <div
-                  className="text-sm text-gray-400"
+                  style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.5 }}
                   dangerouslySetInnerHTML={{ __html: review.content }}
                 />
               </div>
@@ -147,33 +203,52 @@ export default function ProductDetail() {
         )}
 
         {reviewMsg && (
-          <div className={`mb-4 rounded-lg border px-4 py-3 text-xs ${
-            reviewMsg.flag
-              ? 'bg-red-900/20 border-red-800 text-red-300'
-              : 'bg-green-900/20 border-green-800 text-green-300'
-          }`}>
-            <p className="font-medium">{reviewMsg.message}</p>
+          <div style={{
+            marginBottom: '24px',
+            borderRadius: '12px',
+            border: '1px solid',
+            padding: '16px',
+            fontSize: '13px',
+            backgroundColor: reviewMsg.flag ? 'rgba(239, 68, 68, 0.05)' : 'rgba(34, 197, 94, 0.05)',
+            borderColor: reviewMsg.flag ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)',
+            color: 'var(--text)'
+          }}>
+            <p style={{ fontWeight: 500 }}>{reviewMsg.message}</p>
             {reviewMsg.flag && (
-              <p className="mt-1 font-mono text-yellow-400">BANDERA: {reviewMsg.flag}</p>
+              <p style={{ marginTop: '8px', fontFamily: 'monospace', color: '#fbbf24' }}>
+                FLAG: {reviewMsg.flag}
+              </p>
             )}
             {reviewMsg.stolen_cookie && (
-              <p className="mt-1">Cookie del admin: <code className="text-red-400">{reviewMsg.stolen_cookie}</code></p>
+              <p style={{ marginTop: '8px' }}>
+                Admin Cookie: <code style={{ color: '#ef4444' }}>{reviewMsg.stolen_cookie}</code>
+              </p>
             )}
             {reviewMsg.admin_reaction && (
-              <p className="mt-1 text-gray-400">{reviewMsg.admin_reaction}</p>
+              <p style={{ marginTop: '8px', color: 'var(--text-muted)' }}>{reviewMsg.admin_reaction}</p>
             )}
           </div>
         )}
 
-        <form onSubmit={handleReview} className="bg-[#16213e] rounded-lg border border-gray-800 p-4">
-          <h4 className="text-sm font-medium text-gray-300 mb-3">Deja tu reseña</h4>
-          <div className="flex gap-1 mb-3">
+        <form onSubmit={handleReview} style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
+          padding: '24px'
+        }}>
+          <h4 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)', marginBottom: '16px' }}>
+            Write a review
+          </h4>
+          <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
             {[1, 2, 3, 4, 5].map(star => (
               <button
                 key={star}
                 type="button"
                 onClick={() => setReviewRating(star)}
-                className={`text-lg transition ${star <= reviewRating ? 'text-yellow-500' : 'text-gray-700'}`}
+                style={{
+                  background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer',
+                  color: star <= reviewRating ? '#fbbf24' : 'var(--border-hover)'
+                }}
               >
                 ★
               </button>
@@ -182,15 +257,38 @@ export default function ProductDetail() {
           <textarea
             value={reviewContent}
             onChange={e => setReviewContent(e.target.value)}
-            placeholder="Escribe tu opinión como villano profesional..."
-            rows={3}
-            className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:border-red-500 focus:outline-none resize-none mb-3"
+            placeholder="Share your thoughts on this Bug..."
+            rows={4}
+            style={{
+              width: '100%',
+              backgroundColor: 'var(--bg-input)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              padding: '12px 16px',
+              fontSize: '14px',
+              color: 'var(--text)',
+              outline: 'none',
+              resize: 'none',
+              marginBottom: '16px',
+              fontFamily: 'inherit'
+            }}
+            onFocus={e => e.target.style.borderColor = 'var(--text)'}
+            onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
           <button
             type="submit"
-            className="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-4 py-2 rounded-lg transition"
+            style={{
+              backgroundColor: 'var(--bg)',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 500,
+              cursor: 'pointer'
+            }}
           >
-            Publicar Reseña
+            Submit Review
           </button>
         </form>
       </div>

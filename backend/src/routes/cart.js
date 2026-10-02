@@ -4,11 +4,11 @@ const router = Router();
 
 router.post('/api/cart/checkout', requireAuth, (req, res) => {
   const db = req.app.get('db');
-  const villain = req.villain;
+  const user = req.user;
   const { items } = req.body;
 
   if (!items || !Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ error: 'El carrito está vacío. Un villano sin compras es solo un tipo raro.' });
+    return res.status(400).json({ error: 'Your box is empty. Add some Bugs before checking out.' });
   }
 
   let total = 0;
@@ -18,11 +18,11 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
     const product = db.prepare('SELECT id, name, stock FROM products WHERE id = ?').get(item.product_id);
 
     if (!product) {
-      return res.status(400).json({ error: `Producto ${item.product_id} no encontrado.` });
+      return res.status(400).json({ error: `Product ${item.product_id} not found.` });
     }
 
     if (product.stock < (item.quantity || 1)) {
-      return res.status(400).json({ error: `Sin stock de "${product.name}". Otro villano se adelantó.` });
+      return res.status(400).json({ error: `"${product.name}" is out of stock. Another collector got there first.` });
     }
 
     // VULN: usa item.unit_price del request, no product.price de la BD
@@ -38,8 +38,8 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
   }
 
   const order = db.prepare(
-    'INSERT INTO orders (villain_id, status, payment_status, total_price, notes) VALUES (?, ?, ?, ?, ?)'
-  ).run(villain.id, 'confirmed', 'pending', total, `Pedido de ${villain.display_name}`);
+    'INSERT INTO orders (user_id, status, payment_status, total_price, notes) VALUES (?, ?, ?, ?, ?)'
+  ).run(user.id, 'confirmed', 'pending', total, `Drop order by ${user.display_name}`);
 
   const insertItem = db.prepare(
     'INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)'
@@ -58,8 +58,8 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
 
   res.json({
     message: total <= 0
-      ? `¡¿CÓMO?! Acabas de comprar armamento de destrucción masiva por $${total}. Alguien en contabilidad va a ser despedido...`
-      : `Pedido confirmado. Total: $${total.toLocaleString()}. La dominación mundial está un paso más cerca.`,
+      ? `Wait... you just got a Bug for $${total}? That can't be right. Someone in accounting is getting fired.`
+      : `Drop confirmed! Total: $${total.toLocaleString()}. Your collection is growing.`,
     order_id: order.lastInsertRowid,
     total,
     items: validatedItems,

