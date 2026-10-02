@@ -1,143 +1,123 @@
-# pwn-shop
+# Bugdrop
 
-![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
-![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)
-![CTF](https://img.shields.io/badge/CTF-5_Challenges-FF6B6B)
-![License](https://img.shields.io/badge/License-MIT-green)
+A dual-interface cyber range for learning pentesting and bug bounty from scratch.
 
-**Un Cyber Range de doble interfaz para aprender pentesting y bug bounty desde cero.**
+Bugdrop is a training environment built around a deliberately vulnerable e-commerce store — a fictional collectible figures brand — paired with a real-time monitoring dashboard (Mini-SOC) that tracks every attack as it happens. Five CTF challenges are baked into the store, each exposing a different class of web vulnerability.
 
-pwn-shop es un entorno de entrenamiento compuesto por una tienda de e-commerce intencionalmente vulnerable ("Bugdrop" - tienda exclusiva de figuras art toys de colección) y un Panel de Control gamificado que monitorea los ataques en tiempo real.
+---
 
-## Arquitectura
+## Architecture
 
-```mermaid
-graph LR
-    subgraph Atacante
-        B[Navegador / Burp Suite]
-    end
-
-    subgraph "pwn-shop"
-        subgraph "Frontend Shop :5173"
-            S[Bugdrop Shop<br/>React + CSS Variables]
-        end
-
-        subgraph "Backend :3000"
-            API[Express API]
-            DB[(SQLite)]
-            INT[Interceptor<br/>Middleware]
-            JWT[JWT Auth<br/>key: 123456]
-        end
-
-        subgraph "Frontend SOC :5174"
-            SOC[Control Center<br/>React + Recharts]
-        end
-    end
-
-    B -->|HTTP Requests| S
-    S -->|/api/*| API
-    B -.->|Burp/DevTools| API
-    API --> DB
-    API --> JWT
-    API --> INT
-    INT -->|Socket.io<br/>real-time| SOC
+```
+                          Attacker
+                     (Browser / Burp Suite)
+                             |
+              +--------------+--------------+
+              |              |              |
+        Shop :5173     API :3000      SOC :5174
+        (React/Vite)   (Express)     (React/Vite)
+              |              |              |
+              +---------+----+----+---------+
+                        |         |
+                     SQLite    Socket.io
+                   (bugdrop.db)  (real-time)
 ```
 
-## Vulnerabilidades (CTF)
+The shop talks to the API over REST. Every request passes through a middleware interceptor that forwards a structured log to the SOC via Socket.io. The SOC renders traffic in real time — method, path, headers, body, detected threat patterns — so you can watch your own attacks from the defender's perspective.
 
-| # | Reto | Tipo | Dificultad | Descripcion |
-|---|------|------|-----------|-------------|
-| 1 | Manipulación de Carrito | Business Logic | Easy | El servidor confía en el precio enviado por el cliente |
-| 2 | Sesión Robada del Coleccionista | Stored XSS | Medium | Las reseñas se renderizan sin sanitizar |
-| 3 | Fuga de Moldes de Fábrica | IDOR | Easy | Los pedidos no verifican propiedad |
-| 4 | Bypass de Pago VIP | Auth Bypass | Medium | El pago acepta `{"status":"success"}` sin verificar |
-| 5 | Cupón de Administrador | SQL Injection | Easy | Inyección SQL en la suscripción a la newsletter |
+Authentication uses JWT with a deliberately weak secret (`123456`). The session cookie is called `session` and is readable from JavaScript on purpose.
 
-Cada vulnerabilidad tiene un sistema de pistas de 2 niveles (teorica y tecnica) accesible desde el Mini-SOC.
+## Challenges
 
-## Quick Start
+| # | Challenge | Category | Difficulty | What to look for |
+|---|-----------|----------|------------|------------------|
+| 1 | Free Drop | Cart Manipulation | Easy | The server trusts the price sent by the client |
+| 2 | Stolen Session | Stored XSS | Medium | Reviews are rendered without sanitization |
+| 3 | Leaked Molds | IDOR | Easy | Order endpoints don't verify ownership |
+| 4 | Payment Bypass | Business Logic | Medium | The payment flow accepts `{"status":"success"}` without verification |
+| 5 | Admin Coupon | SQL Injection | Easy | The newsletter input is concatenated raw into a SQL query |
 
-### Con Docker (recomendado)
+Each challenge awards a flag (`FLAG{...}`) and has a two-level hint system accessible from the SOC — one conceptual, one technical.
+
+## Getting started
+
+### With Docker
 
 ```bash
-git clone https://github.com/tu-usuario/pwn-shop.git
-cd pwn-shop
+git clone https://github.com/javiernglz/bugdrop.git
+cd bugdrop
 docker compose up --build
 ```
 
-### Instalacion local
+### Local install
 
 ```bash
-git clone https://github.com/tu-usuario/pwn-shop.git
-cd pwn-shop
+git clone https://github.com/javiernglz/bugdrop.git
+cd bugdrop
 
-# Instalar dependencias de los 3 servicios
+# Install dependencies for all three services
 npm run install:all
 
-# Sembrar la base de datos
+# Seed the database
 npm run seed
 
-# Arrancar todo (backend + shop + soc)
+# Start everything (backend + shop + soc)
 npm run dev
 ```
 
-### Acceso
+### Access
 
-| Servicio | URL | Descripcion |
-|----------|-----|-------------|
-| Tienda | http://localhost:5173 | E-commerce vulnerable |
-| Mini-SOC | http://localhost:5174 | Panel de monitoreo + CTF |
-| API | http://localhost:3000 | Backend REST |
+| Service | URL | Description |
+|---------|-----|-------------|
+| Shop | http://localhost:5173 | The vulnerable store |
+| Mini-SOC | http://localhost:5174 | Monitoring dashboard and CTF panel |
+| API | http://localhost:3000 | Backend REST API |
 
-## Como jugar
+## How to play
 
-1. Abre la **Tienda** (`:5173`) y el **Mini-SOC** (`:5174`) en dos pestanas
-2. Inicia sesion en la tienda con una cuenta de prueba (hay un boton para verlas)
-3. Navega por la tienda — veras el trafico aparecer en la consola del SOC en tiempo real
-4. Intenta explotar las vulnerabilidades usando las DevTools del navegador o Burp Suite
-5. Cuando obtengas una flag (`FLAG{...}`), introducela en el SOC para desbloquear la medalla
-6. Usa el sistema de pistas si te atascas (nivel 1 = teoria, nivel 2 = tecnica)
-7. Si rompes la base de datos, usa el **Boton de Panico** en el SOC para resetear
+1. Open the Shop (`:5173`) and the Mini-SOC (`:5174`) side by side.
+2. Log in to the shop with one of the test accounts (visible on the login page).
+3. Browse the store normally — you'll see traffic flowing into the SOC console in real time.
+4. Try to exploit the vulnerabilities using your browser's DevTools or Burp Suite.
+5. When you capture a flag, submit it in the SOC to unlock the badge.
+6. Use the hint system if you get stuck. Level 1 gives you the concept, level 2 gives you the technique.
+7. If you break the database, hit the Panic Button in the SOC to reset everything.
 
 ## Stack
 
-- **Backend**: Node.js + Express + SQLite (better-sqlite3) + Socket.io + JWT
-- **Frontend Shop**: React 19 + Vite + Tailwind CSS 4
-- **Frontend SOC**: React 19 + Vite + Tailwind CSS 4 + Recharts + Canvas Confetti
-- **Monorepo**: Concurrently para desarrollo, Docker Compose para produccion
+- **Backend**: Node.js, Express, SQLite (better-sqlite3), Socket.io, JWT
+- **Shop frontend**: React 19, Vite, Tailwind CSS 4
+- **SOC frontend**: React 19, Vite, Tailwind CSS 4, Recharts, Canvas Confetti
+- **Orchestration**: Concurrently for development, Docker Compose for production
 
-## Estructura del proyecto
+## Project structure
 
 ```
-pwn-shop/
-├── backend/
-│   ├── src/
-│   │   ├── db/           # init.js, seed.js
-│   │   ├── middleware/    # socInterceptor.js, authJwt.js
-│   │   └── routes/       # auth, products, cart, reviews, orders, payment, ctf, system
-│   └── Dockerfile
-├── frontend-shop/
-│   ├── src/
-│   │   ├── components/   # Layout
-│   │   ├── context/      # AuthContext, CartContext
-│   │   └── pages/        # Catalog, ProductDetail, Cart, Orders, Login
-│   └── Dockerfile
-├── frontend-soc/
-│   ├── src/
-│   │   ├── components/   # LogConsole, TrafficCharts, ChallengePanel, FlagInput, StatsBar, PanicButton
-│   │   └── hooks/        # useSocket, useCtf, useAlertSound
-│   └── Dockerfile
-├── docker-compose.yml
-└── README.md
+bugdrop/
+  backend/
+    src/
+      db/           init.js, seed.js
+      middleware/    socInterceptor.js, authJwt.js
+      routes/       auth, products, cart, reviews, orders, payment, ctf, system
+    Dockerfile
+  frontend-shop/
+    src/
+      components/   Layout
+      context/      AuthContext, CartContext
+      pages/        Catalog, ProductDetail, Cart, Orders, Login
+    Dockerfile
+  frontend-soc/
+    src/
+      components/   LogConsole, TrafficCharts, ChallengePanel, FlagInput, StatsBar, PanicButton
+      hooks/        useSocket, useCtf, useAlertSound
+    Dockerfile
+  docker-compose.yml
 ```
 
-## Aviso legal
+## Disclaimer
 
-Este proyecto es exclusivamente educativo. Todas las vulnerabilidades son intencionales y estan documentadas. No uses estas tecnicas en sistemas sin autorizacion explicita. Practica siempre en entornos controlados.
+This project is strictly educational. Every vulnerability is intentional and documented. Do not use these techniques against systems without explicit authorization. Practice only in controlled environments.
 
-## Licencia
+## License
 
 MIT
