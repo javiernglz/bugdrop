@@ -1,0 +1,10 @@
+[SYSTEM BACKUP - BUGDROP]
+Date: 2026-10-01
+Status: PARTIAL EXPORT
+
+-- NOTES FOR DEV TEAM --
+1. Remember to never commit .env files again.
+2. The Admin panel has been successfully migrated to /admin. Make sure to delete the old routes.
+3. If anyone forgets the master JWT secret again, we're in trouble.
+
+FLAG: FLAG{fuzzing_uncovered_hidden_backups}

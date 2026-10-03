@@ -205,8 +205,15 @@ const flags = [
     'Admin (Admin Panel)',
     'Access the secret administrator dashboard using a stolen session.',
     'hard',
-    'Where do admins usually log in or view internal data? Look for hidden routes like /admin or /admin.',
-    'Use the JWT token stolen from the Stored XSS challenge. Set it in your browser localStorage as "bugdrop_token" and navigate to /admin.'],
+    'Where do admins usually log in or view internal data? Look for hidden routes like /admin.',
+    'Use the JWT token stolen from the Stored XSS challenge. Set it in your browser cookie or localStorage and navigate to /admin.'],
+  ['info_disclosure',
+    'FLAG{fuzzing_uncovered_hidden_backups}',
+    'Hidden Backups (Info Disclosure)',
+    'Find the hidden backup file left by the developers on the public server.',
+    'medium',
+    'Not every page is linked in the navigation bar. Have you tried asking the server if common files or directories exist?',
+    'Use a directory brute-forcing tool (like Gobuster, Dirb, or ffuf) with a common wordlist. Look for files with extensions like .txt, .zip, or .bak. Start with "backup".']
 ];
 
 for (const f of flags) {
@@ -230,6 +237,7 @@ console.log(`
 ║  4. FLAG{payment_bypass_vip_collector}           ║
 ║  5. FLAG{sqli_newsletter_admin_coupon}           ║
 ║  6. FLAG{the_creator_secret_panel}               ║
+║  7. FLAG{fuzzing_uncovered_hidden_backups}       ║
 ╚══════════════════════════════════════════════════╝
 `);
 

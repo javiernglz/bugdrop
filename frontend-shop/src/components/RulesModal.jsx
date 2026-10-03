@@ -124,22 +124,27 @@ export default function RulesModal() {
         </h2>
         <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.65, marginBottom: '24px' }}>
           This is not a real store. Bugdrop is a training environment with
-          5 real web vulnerabilities hidden across the site. Find them,
+          7 real web vulnerabilities hidden across the site. Find them,
           exploit them, capture the flags. Use DevTools, intercept requests,
-          read the source — everything you need is already here.
+          read the source, and fuzz endpoints — everything you need is already here.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
           <Spoiler label="What kind of vulnerabilities?">
             You are looking for business logic flaws, injection points,
-            access control issues, and client-side trust problems. Five in total,
-            ranging from easy to medium difficulty.
+            access control issues, client-side trust problems, and information leaks.
+            Seven in total, ranging from easy to hard difficulty.
           </Spoiler>
 
           <Spoiler label="Where should I look?">
             The checkout flow, product reviews, order history, the payment
-            process, and the newsletter form at the bottom of the page.
-            Each one hides a different class of vulnerability.
+            process, the newsletter form, and hidden developer assets.
+          </Spoiler>
+          
+          <Spoiler label="Is Fuzzing allowed?">
+            Yes! You can (and should) use directory brute-forcing tools like
+            Gobuster, DirBuster, or ffuf with a common wordlist. Not all
+            files are linked in the frontend. Just try not to launch DoS attacks.
           </Spoiler>
 
           <Spoiler label="I need more help">
