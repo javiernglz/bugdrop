@@ -10,12 +10,12 @@ export default function ChallengePanel({ challenges, solved, hints, onGetHint })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {challenges.map((chal) => {
-        const isSolved = (solved || []).includes(chal.key);
+        const isSolved = (solved || []).includes(chal.challenge_key);
         // hints is an object keyed by `${challengeKey}-${level}`
-        const hasHint = !!(hints && hints[`${chal.key}-1`]);
+        const hasHint = !!(hints && hints[`${chal.challenge_key}-1`]);
 
         return (
-          <div key={chal.key} style={{
+          <div key={chal.challenge_key} style={{
             padding: '16px',
             border: '1px solid var(--border)',
             borderRadius: '8px',
@@ -45,11 +45,11 @@ export default function ChallengePanel({ challenges, solved, hints, onGetHint })
               <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
                 {hasHint ? (
                   <div style={{ fontSize: '12px', color: 'var(--warning)', backgroundColor: 'var(--bg)', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
-                    <strong>Hint:</strong> {hints[`${chal.key}-1`]?.hint || 'No hint available.'}
+                    <strong>Hint:</strong> {hints[`${chal.challenge_key}-1`]?.hint || 'No hint available.'}
                   </div>
                 ) : (
                   <button
-                    onClick={() => onGetHint(chal.key, 1)}
+                    onClick={() => onGetHint(chal.challenge_key, 1)}
                     style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}
                   >
                     Reveal Hint (-5 pts)
