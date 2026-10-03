@@ -69,9 +69,10 @@ npm run dev
 
 | Service | URL | Description |
 |---------|-----|-------------|
+| **Cyber Range** | **http://localhost:3000** | **Split View (TryHackMe style) - Recommended** |
 | Shop | http://localhost:5173 | The vulnerable store |
 | Mini-SOC | http://localhost:5174 | Monitoring dashboard and CTF panel |
-| API | http://localhost:3000 | Backend REST API |
+| API | http://localhost:3000/api/health | Backend REST API |
 
 ## How to play
 

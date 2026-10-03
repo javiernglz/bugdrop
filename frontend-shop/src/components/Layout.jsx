@@ -2,6 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useState, useEffect } from 'react';
+import RulesModal from './RulesModal';
+import Tutorials from './Tutorials';
 
 function SunIcon() {
   return (
@@ -67,7 +69,9 @@ export default function Layout({ children }) {
           </Link>
 
           <nav className="flex items-center gap-6">
-            {navLink('/', 'Drops')}
+            <Link to="/" id="nav-drops" style={{ color: isActive('/') ? 'var(--text)' : 'var(--text-muted)' }} className="text-sm hover:opacity-70 transition-opacity">
+              Drops
+            </Link>
             {user && navLink('/orders', 'My Collection')}
             <Link
               to="/cart"
@@ -161,6 +165,7 @@ export default function Layout({ children }) {
               style={{ display: 'flex', borderBottom: '1px solid var(--text)', paddingBottom: '8px', maxWidth: '400px' }}
             >
               <input
+                id="newsletter-input"
                 type="text"
                 name="email"
                 placeholder="EMAIL ADDRESS"
@@ -200,6 +205,8 @@ export default function Layout({ children }) {
           </div>
         </div>
       </footer>
+      <RulesModal />
+      <Tutorials />
     </div>
   );
 }

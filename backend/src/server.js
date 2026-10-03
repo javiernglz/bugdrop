@@ -55,6 +55,12 @@ app.use(paymentRoutes);
 app.use(ctfRoutes);
 app.use(systemRoutes);
 
+const path = require('path');
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../cyber-range.html'));
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'operational',

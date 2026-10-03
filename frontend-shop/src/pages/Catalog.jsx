@@ -117,7 +117,7 @@ export default function Catalog() {
             <Link
               key={product.id}
               to={`/products/${product.id}`}
-              className="group block"
+              className="group block product-card"
               style={{ textDecoration: 'none' }}
             >
               {/* Image */}

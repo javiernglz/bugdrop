@@ -146,6 +146,7 @@ export default function ProductDetail() {
           </div>
 
           <button
+            id="add-to-box-btn"
             onClick={handleAddToCart}
             style={{
               width: '100%',
@@ -255,6 +256,7 @@ export default function ProductDetail() {
             ))}
           </div>
           <textarea
+            id="review-textarea"
             value={reviewContent}
             onChange={e => setReviewContent(e.target.value)}
             placeholder="Share your thoughts on this Bug..."
@@ -276,6 +278,7 @@ export default function ProductDetail() {
             onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
           <button
+            id="submit-review-btn"
             type="submit"
             style={{
               backgroundColor: 'var(--bg)',
