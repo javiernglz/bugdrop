@@ -10,15 +10,29 @@ export default function Tutorials() {
   const runTutorial = (tutorialId) => {
     setOpen(false);
     
+    let driverObj;
+    
+    const autoAdvance = (el) => {
+      if (el) {
+        el.addEventListener('click', () => {
+          setTimeout(() => {
+            if (driverObj) driverObj.moveNext();
+          }, 250);
+        }, { once: true });
+      }
+    };
+
     let steps = [];
     if (tutorialId === 'cart') {
       steps = [
         {
           element: '#nav-drops',
+          onHighlightStarted: autoAdvance,
           popover: { title: 'Step 1: The Catalog', description: 'Click here to make sure you are on the Drops page.', side: "bottom", align: 'start' }
         },
         {
           element: '.product-card', // Just the first one
+          onHighlightStarted: autoAdvance,
           popover: { title: 'Step 2: Pick a Bug', description: 'Click on any Bug to view its details.', side: "right", align: 'start' }
         },
         {
@@ -33,7 +47,8 @@ export default function Tutorials() {
       steps = [
         {
           element: '.product-card', 
-          popover: { title: 'Step 1: Product Page', description: 'Go to any product details page where you can see the reviews.', side: "right" }
+          onHighlightStarted: autoAdvance,
+          popover: { title: 'Step 1: Product Page', description: 'Click on any product to go to its details page where you can see the reviews.', side: "right" }
         },
         {
           element: '#review-textarea',
@@ -54,9 +69,37 @@ export default function Tutorials() {
           popover: { title: 'Step 2: SQL Injection', description: 'Try typing a SQL injection payload like: admin\' OR \'1\'=\'1. The server concatenates this raw string directly into the SQL query, bypassing normal checks.' }
         }
       ];
+    } else if (tutorialId === 'idor') {
+      steps = [
+        {
+          element: '#nav-collection',
+          onHighlightStarted: autoAdvance,
+          popover: { title: 'Step 1: Your Collection', description: 'Make sure you are logged in, then head to your Collection to see your past orders.', side: "bottom" }
+        },
+        {
+          popover: { title: 'Step 2: Inspect the Request', description: 'When you click on one of your drops to view details, watch the Network tab. The frontend requests /api/orders/{id}.' }
+        },
+        {
+          popover: { title: 'Step 3: IDOR Exploit', description: 'What happens if you just change that number to 1? (e.g. /api/orders/1). Try making the request manually or intercepting it. Does the server check if order #1 belongs to you?' }
+        }
+      ];
+    } else if (tutorialId === 'payment') {
+      steps = [
+        {
+          popover: { title: 'Step 1: The Setup', description: 'First, add any item to your box and go to Checkout. Place the order WITHOUT paying.' }
+        },
+        {
+          element: '#nav-collection',
+          onHighlightStarted: autoAdvance,
+          popover: { title: 'Step 2: Pending Order', description: 'Go to your Collection. You will see a "pending" order with a "Complete Payment" button.', side: "bottom" }
+        },
+        {
+          popover: { title: 'Step 3: The Exploit', description: 'Click Complete Payment but INTERCEPT the request to /api/orders/{id}/pay. The server blindly trusts the client. Just send {"status": "success"} in the JSON body!' }
+        }
+      ];
     }
 
-    const driverObj = driver({
+    driverObj = driver({
       showProgress: true,
       steps: steps,
       nextBtnText: 'Next',
@@ -98,6 +141,18 @@ export default function Tutorials() {
             style={{ textAlign: 'left', padding: '8px 12px', fontSize: '12px', borderRadius: '6px', background: 'var(--bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text)' }}
           >
             📝 Challenge 2: Stored XSS
+          </button>
+          <button 
+            onClick={() => runTutorial('idor')}
+            style={{ textAlign: 'left', padding: '8px 12px', fontSize: '12px', borderRadius: '6px', background: 'var(--bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text)' }}
+          >
+            🕵️ Challenge 3: Leaked Molds (IDOR)
+          </button>
+          <button 
+            onClick={() => runTutorial('payment')}
+            style={{ textAlign: 'left', padding: '8px 12px', fontSize: '12px', borderRadius: '6px', background: 'var(--bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text)' }}
+          >
+            💳 Challenge 4: Payment Bypass
           </button>
           <button 
             onClick={() => runTutorial('sqli')}

@@ -12,6 +12,7 @@ const orderRoutes = require('./routes/orders');
 const paymentRoutes = require('./routes/payment');
 const ctfRoutes = require('./routes/ctf');
 const systemRoutes = require('./routes/system');
+const adminRoutes = require('./routes/admin');
 const socInterceptor = require('./middleware/socInterceptor');
 
 const app = express();
@@ -54,6 +55,7 @@ app.use(orderRoutes);
 app.use(paymentRoutes);
 app.use(ctfRoutes);
 app.use(systemRoutes);
+app.use(adminRoutes);
 
 const path = require('path');
 

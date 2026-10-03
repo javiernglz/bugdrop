@@ -2,7 +2,18 @@
 
 A dual-interface cyber range for learning pentesting and bug bounty from scratch.
 
-Bugdrop is a training environment built around a deliberately vulnerable e-commerce store — a fictional collectible figures brand — paired with a real-time monitoring dashboard (Mini-SOC) that tracks every attack as it happens. Five CTF challenges are baked into the store, each exposing a different class of web vulnerability.
+Bugdrop is a training environment built around a deliberately vulnerable e-commerce store — a fictional collectible figures brand — paired with a real-time monitoring dashboard (Mini-SOC) that tracks every attack as it happens. Six CTF challenges are baked into the store, each exposing a different class of web vulnerability.
+
+## Screenshots
+*(Añade aquí un par de capturas de pantalla de la tienda y del SOC)*
+![Bugdrop Store](docs/storefront.png)
+![Bugdrop SOC](docs/soc.png)
+
+## Key Features
+- **3D Art Toy Aesthetic:** A premium, fully custom-designed frontend that breaks the mold of typical boring CTF environments.
+- **Interactive AI Tutorials:** In-app floating avatars (Driver.js) guide beginners through the interface and hacking basics.
+- **Real-Time SOC Dashboard:** Watch your HTTP traffic, detected XSS/SQLi threats, and submit flags in a live React dashboard powered by WebSockets.
+- **Story-Driven CTF:** Play the role of a rogue collector trying to infiltrate the Admin's secret panel and steal the master factory molds.
 
 ---
 
@@ -36,6 +47,7 @@ Authentication uses JWT with a deliberately weak secret (`123456`). The session 
 | 3 | Leaked Molds | IDOR | Easy | Order endpoints don't verify ownership |
 | 4 | Payment Bypass | Business Logic | Medium | The payment flow accepts `{"status":"success"}` without verification |
 | 5 | Admin Coupon | SQL Injection | Easy | The newsletter input is concatenated raw into a SQL query |
+| 6 | Admin Panel Access | Authentication / Recon | Hard | Hidden `/admin` route accessible only with a stolen JWT cookie |
 
 Each challenge awards a flag (`FLAG{...}`) and has a two-level hint system accessible from the SOC — one conceptual, one technical.
 

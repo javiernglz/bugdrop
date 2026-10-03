@@ -46,7 +46,7 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
   }
 
   res.status(400).json({
-    error: 'Unrecognized payment status. Send {"status": "success"} to confirm.',
+    error: 'Unrecognized payment status.',
     hint: 'No funds? Maybe you can... convince the system you paid.',
   });
 });

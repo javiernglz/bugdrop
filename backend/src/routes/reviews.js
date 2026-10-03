@@ -37,11 +37,11 @@ router.post('/api/products/:id/reviews', requireAuth, (req, res) => {
       : null;
 
     return res.json({
-      message: `Review posted. The Creator just reviewed it and... something strange happened with their browser.`,
+      message: `Review posted. Admin just reviewed it and... something strange happened with their browser.`,
       review_id: result.lastInsertRowid,
       flag: flag ? flag.flag_value : undefined,
       stolen_cookie: adminToken,
-      admin_reaction: 'My JWT was intercepted. Someone can impersonate The Creator...',
+      admin_reaction: 'My JWT was intercepted. Someone can impersonate Admin...',
     });
   }
 

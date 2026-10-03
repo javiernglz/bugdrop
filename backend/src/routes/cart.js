@@ -51,8 +51,8 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
   }
 
   let flag = null;
-  const hasDeathRay = validatedItems.some(i => i.product_id === 1);
-  if (hasDeathRay && total <= 0) {
+  const hasSecretBug = validatedItems.some(i => i.product_id === 12);
+  if (hasSecretBug && total <= 0) {
     flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('cart_manipulation');
   }
 

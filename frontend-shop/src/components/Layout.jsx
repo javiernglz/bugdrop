@@ -72,7 +72,16 @@ export default function Layout({ children }) {
             <Link to="/" id="nav-drops" style={{ color: isActive('/') ? 'var(--text)' : 'var(--text-muted)' }} className="text-sm hover:opacity-70 transition-opacity">
               Drops
             </Link>
-            {user && navLink('/orders', 'My Collection')}
+            {user && (
+              <Link
+                to="/orders"
+                id="nav-collection"
+                style={{ color: isActive('/orders') ? 'var(--text)' : 'var(--text-muted)' }}
+                className="text-sm hover:opacity-70 transition-opacity"
+              >
+                My Collection
+              </Link>
+            )}
             <Link
               to="/cart"
               style={{ color: isActive('/cart') ? 'var(--text)' : 'var(--text-muted)' }}
