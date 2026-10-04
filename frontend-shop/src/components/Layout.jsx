@@ -58,11 +58,9 @@ export default function Layout({ children }) {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
 
           <Link to="/" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text)' }}>
-              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-              <path d="M12 8v4l3 3"/>
-              <path d="M8 12c0-2.21 1.79-4 4-4"/>
-            </svg>
+            <div style={{ width: '24px', height: '24px', borderRadius: '4px', overflow: 'hidden' }}>
+              <img src="/bug-guide-head.png" alt="Bugdrop" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
             <span style={{ color: 'var(--text)' }} className="text-sm font-medium tracking-wide">
               Bugdrop
             </span>

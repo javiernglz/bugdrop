@@ -30,14 +30,12 @@ export default function App() {
             height: '32px',
             borderRadius: '6px',
             backgroundColor: 'var(--text)',
-            color: 'var(--bg)',
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontWeight: 700,
-            fontSize: '14px'
           }}>
-            B
+            <img src="/bug-guide-head.png" alt="Bugdrop Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
             <h1 style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '0.02em', margin: 0 }}>
