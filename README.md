@@ -80,16 +80,17 @@ npm run dev
 
 ### Access
 
+### Access
+
 | Service | URL | Description |
 |---------|-----|-------------|
-| **Cyber Range** | **http://localhost:3000** | **Split View (TryHackMe style) - Recommended** |
-| Shop | http://localhost:5173 | The vulnerable store |
-| Mini-SOC | http://localhost:5174 | Monitoring dashboard and CTF panel |
-| API | http://localhost:3000/api/health | Backend REST API |
+| Shop | http://localhost:5173 | The vulnerable store (Attack from here) |
+| Mini-SOC | http://localhost:5174 | Monitoring dashboard (Defend from here) |
+| API | http://localhost:3000 | Backend REST API |
 
 ## How to play
 
-1. Open the Shop (`:5173`) and the Mini-SOC (`:5174`) side by side.
+1. Open the Shop (`http://localhost:5173`) and the Mini-SOC (`http://localhost:5174`) in two separate windows side by side.
 2. Log in to the shop with one of the test accounts (visible on the login page).
 3. Browse the store normally — you'll see traffic flowing into the SOC console in real time.
 4. Try to exploit the vulnerabilities using your browser's DevTools or Burp Suite.

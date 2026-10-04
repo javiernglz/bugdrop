@@ -60,7 +60,7 @@ app.use(adminRoutes);
 const path = require('path');
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../cyber-range.html'));
+  res.json({ message: 'Bugdrop API is running. Access the Shop on port 5173 and the SOC on port 5174.' });
 });
 
 app.get('/api/health', (_req, res) => {
