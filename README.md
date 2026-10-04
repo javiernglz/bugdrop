@@ -80,8 +80,6 @@ npm run dev
 
 ### Access
 
-### Access
-
 | Service | URL | Description |
 |---------|-----|-------------|
 | Shop | http://localhost:5173 | The vulnerable store (Attack from here) |
