@@ -14,7 +14,7 @@ router.get('/api/admin/dashboard', requireAuth, (req, res) => {
   const flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('admin_panel');
 
   res.json({
-    message: 'Welcome to the inner sanctum, Creator.',
+    message: 'Welcome to the inner sanctum, Admin.',
     stats: {
       revenue: '$2.4M',
       active_molds: 12,

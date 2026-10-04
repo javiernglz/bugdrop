@@ -55,7 +55,7 @@ router.post('/api/auth/login', (req, res) => {
 });
 
 router.get('/api/auth/me', (req, res) => {
-  const token = req.cookies.session || req.headers.authorization?.replace('Bearer ', '');
+  const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.session;
 
   if (!token) {
     return res.status(401).json({ error: 'Not authenticated' });

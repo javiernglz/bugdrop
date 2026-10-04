@@ -15,13 +15,17 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
   const validatedItems = [];
 
   for (const item of items) {
-    const product = db.prepare('SELECT id, name, stock FROM products WHERE id = ?').get(item.product_id);
+    const product = db.prepare('SELECT id, name, stock, category FROM products WHERE id = ?').get(item.product_id);
 
     if (!product) {
       return res.status(400).json({ error: `Product ${item.product_id} not found.` });
     }
 
-    if (product.stock < (item.quantity || 1)) {
+    // The secret Bug never runs out: otherwise a single normal test purchase would make
+    // the Cart challenge impossible until the database is reset.
+    const unlimitedStock = product.category === 'secret';
+
+    if (!unlimitedStock && product.stock < (item.quantity || 1)) {
       return res.status(400).json({ error: `"${product.name}" is out of stock. Another collector got there first.` });
     }
 
@@ -34,6 +38,7 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
       product_name: product.name,
       quantity: item.quantity || 1,
       unit_price: item.unit_price || 0,
+      unlimited_stock: unlimitedStock,
     });
   }
 
@@ -47,7 +52,9 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
 
   for (const item of validatedItems) {
     insertItem.run(order.lastInsertRowid, item.product_id, item.quantity, item.unit_price);
-    db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?').run(item.quantity, item.product_id);
+    if (!item.unlimited_stock) {
+      db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?').run(item.quantity, item.product_id);
+    }
   }
 
   let flag = null;
