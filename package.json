@@ -2,7 +2,7 @@
   "name": "bugdrop",
   "version": "1.0.0",
   "private": true,
-  "description": "Cyber Range: Villain Supply Co. + Mini-SOC",
+  "description": "Cyber Range: Bugdrop + Mini-SOC",
   "scripts": {
     "dev": "npx concurrently -n BACKEND,SHOP,SOC -c red,blue,magenta \"npm run dev:backend\" \"npm run dev:shop\" \"npm run dev:soc\"",
     "dev:backend": "cd backend && npm run dev",

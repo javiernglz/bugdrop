@@ -258,6 +258,7 @@ export default function Cart() {
           </div>
 
           <button
+            id="checkout-btn"
             onClick={handleCheckout}
             disabled={processing}
             style={{

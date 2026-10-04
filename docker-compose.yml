@@ -2,15 +2,16 @@ services:
   backend:
     build: ./backend
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - PORT=3000
+      - HOST=0.0.0.0
     restart: unless-stopped
 
   shop:
     build: ./frontend-shop
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
     environment:
       - BACKEND_URL=http://backend:3000
     depends_on:
@@ -20,7 +21,7 @@ services:
   soc:
     build: ./frontend-soc
     ports:
-      - "5174:5174"
+      - "127.0.0.1:5174:5174"
     environment:
       - BACKEND_URL=http://backend:3000
     depends_on:

@@ -6,8 +6,8 @@ Bugdrop is a training environment built around a deliberately vulnerable e-comme
 
 ## Screenshots
 *(Añade aquí un par de capturas de pantalla de la tienda y del SOC)*
-![Bugdrop Store](docs/storefront.png)
-![Bugdrop SOC](docs/soc.png)
+<!-- ![Bugdrop Store](docs/storefront.png) -->
+<!-- ![Bugdrop SOC](docs/soc.png) -->
 
 ## Key Features
 - **3D Art Toy Aesthetic:** A premium, fully custom-designed frontend that breaks the mold of typical boring CTF environments.
@@ -43,11 +43,12 @@ Authentication uses JWT with a deliberately weak secret (`123456`). The session 
 | # | Challenge | Category | Difficulty | What to look for |
 |---|-----------|----------|------------|------------------|
 | 1 | Free Drop | Cart Manipulation | Easy | The server trusts the price sent by the client |
-| 2 | Stolen Session | Stored XSS | Medium | Reviews are rendered without sanitization |
-| 3 | Leaked Molds | IDOR | Easy | Order endpoints don't verify ownership |
-| 4 | Payment Bypass | Business Logic | Medium | The payment flow accepts `{"status":"success"}` without verification |
-| 5 | Admin Coupon | SQL Injection | Easy | The newsletter input is concatenated raw into a SQL query |
-| 6 | Admin Panel Access | Authentication / Recon | Hard | Hidden `/admin` route accessible only with a stolen JWT cookie |
+| 2 | Backup Leak | Information Disclosure | Easy | Hidden files on the web root left behind |
+| 3 | Stolen Session | Stored XSS | Medium | Reviews are rendered without sanitization |
+| 4 | Leaked Molds | IDOR | Easy | Order endpoints don't verify ownership |
+| 5 | Payment Bypass | Business Logic | Medium | The payment flow accepts `{"status":"success"}` without verification |
+| 6 | Admin Coupon | SQL Injection | Easy | The newsletter input is concatenated raw into a SQL query |
+| 7 | Admin Panel Access | Authentication / Recon | Hard | Hidden `/admin` route accessible only with a stolen JWT cookie |
 
 Each challenge awards a flag (`FLAG{...}`) and has a two-level hint system accessible from the SOC — one conceptual, one technical.
 

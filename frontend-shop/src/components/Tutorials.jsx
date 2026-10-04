@@ -31,16 +31,26 @@ export default function Tutorials() {
           popover: { title: 'Step 1: The Catalog', description: 'Click here to make sure you are on the Drops page.', side: "bottom", align: 'start' }
         },
         {
-          element: '.product-card', // Just the first one
+          element: '.product-card:last-child', // Bug ??? is always the last card
           onHighlightStarted: autoAdvance,
-          popover: { title: 'Step 2: Pick a Bug', description: 'Click on any Bug to view its details.', side: "right", align: 'start' }
+          popover: { title: 'Step 2: The Secret Bug', description: 'The mysterious Bug ??? at the end costs $999. Click it. Your goal: get it for $0 or less.', side: "left", align: 'start' }
         },
         {
           element: '#add-to-box-btn',
-          popover: { title: 'Step 3: Intercept', description: 'Before clicking this, open your DevTools (F12) -> Network tab. Watch the POST request to /api/cart when you click it.', side: "left", align: 'start' }
+          onHighlightStarted: autoAdvance,
+          popover: { title: 'Step 3: Add it to your box', description: 'Click it. Nothing is sent to the server yet: your box lives in the browser.', side: "left", align: 'start' }
         },
         {
-          popover: { title: 'Step 4: Exploit', description: 'Did you notice the client sends the price? Use "Copy as Fetch" in DevTools, change the price to a negative number, and run it in the console! Then check your Cart.' }
+          element: '#nav-cart',
+          onHighlightStarted: autoAdvance,
+          popover: { title: 'Step 4: Open your box', description: 'You need to be logged in to check out, so sign in first if you have not.', side: "bottom", align: 'start' }
+        },
+        {
+          element: '#checkout-btn',
+          popover: { title: 'Step 5: Intercept', description: 'Before clicking Checkout, open DevTools (F12) and go to the Network tab. Then click it and inspect the POST /api/cart/checkout request. Look at its JSON body: who decides the price?', side: "top", align: 'start' }
+        },
+        {
+          popover: { title: 'Step 6: Exploit', description: 'The price travels in the request, so you can change it. Copy the request as fetch from DevTools, edit unit_price, and replay it from the console (or intercept it with Burp). The goal is Bug ??? for $0 or less.' }
         }
       ];
     } else if (tutorialId === 'xss') {
@@ -52,7 +62,7 @@ export default function Tutorials() {
         },
         {
           element: '#review-textarea',
-          popover: { title: 'Step 2: Payload Injection', description: 'This form doesn\'t sanitize HTML. Try injecting a malicious script tag here, like <script>alert(1)</script>.', side: "top" }
+          popover: { title: 'Step 2: Payload Injection', description: 'This form does not sanitize HTML. Try injecting an element with an event handler, like &lt;img src=x onerror=alert(1)&gt;. (A plain script tag will not run when inserted this way: browsers ignore scripts added through innerHTML.)', side: "top" }
         },
         {
           element: '#submit-review-btn',
@@ -91,7 +101,7 @@ export default function Tutorials() {
         {
           element: '#nav-collection',
           onHighlightStarted: autoAdvance,
-          popover: { title: 'Step 2: Pending Order', description: 'Go to your Collection. You will see a "pending" order with a "Complete Payment" button.', side: "bottom" }
+          popover: { title: 'Step 2: Pending Order', description: 'Go to your Collection and click your pending order to open its details. You will see a "Complete Payment" button there.', side: "bottom" }
         },
         {
           popover: { title: 'Step 3: The Exploit', description: 'Click Complete Payment but INTERCEPT the request to /api/orders/{id}/pay. The server blindly trusts the client. Just send {"status": "success"} in the JSON body!' }

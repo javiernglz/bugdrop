@@ -84,6 +84,7 @@ export default function Layout({ children }) {
             )}
             <Link
               to="/cart"
+              id="nav-cart"
               style={{ color: isActive('/cart') ? 'var(--text)' : 'var(--text-muted)' }}
               className="relative text-sm hover:opacity-70 transition-opacity"
             >

@@ -60,7 +60,7 @@ app.use(adminRoutes);
 const path = require('path');
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../cyber-range.html'));
+  res.sendFile(path.join(__dirname, '../cyber-range.html'));
 });
 
 app.get('/api/health', (_req, res) => {
@@ -72,7 +72,10 @@ app.get('/api/health', (_req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+// Deliberately vulnerable app: bind to localhost only unless HOST is set explicitly
+// (Docker sets HOST=0.0.0.0 inside the container; compose publishes it on 127.0.0.1).
+const HOST = process.env.HOST || '127.0.0.1';
+server.listen(PORT, HOST, () => {
   console.log(`
   ╔══════════════════════════════════════════════╗
   ║   📦 BUGDROP — Backend active                ║

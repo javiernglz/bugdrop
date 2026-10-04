@@ -1,7 +1,7 @@
 {
-  "name": "pwn-shop-backend",
+  "name": "bugdrop-backend",
   "version": "1.0.0",
-  "description": "Villain Supply Co. - Backend vulnerable para Cyber Range educativo",
+  "description": "Bugdrop - Backend vulnerable para Cyber Range educativo",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
