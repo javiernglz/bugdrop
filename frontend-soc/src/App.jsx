@@ -29,13 +29,12 @@ export default function App() {
             width: '32px',
             height: '32px',
             borderRadius: '6px',
-            backgroundColor: 'var(--text)',
-            overflow: 'hidden',
+            backgroundColor: 'var(--bg-card)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}>
-            <img src="/bug-guide-head.png" alt="Bugdrop Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src="/logo-head-nobg.png" alt="Bugdrop Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(1.15)' }} />
           </div>
           <div>
             <h1 style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '0.02em', margin: 0 }}>

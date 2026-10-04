@@ -58,8 +58,8 @@ export default function Layout({ children }) {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
 
           <Link to="/" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-            <div style={{ width: '24px', height: '24px', borderRadius: '4px', overflow: 'hidden' }}>
-              <img src="/bug-guide-head.png" alt="Bugdrop" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src="/logo-head-nobg.png" alt="Bugdrop" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(1.15)' }} />
             </div>
             <span style={{ color: 'var(--text)' }} className="text-sm font-medium tracking-wide">
               Bugdrop
