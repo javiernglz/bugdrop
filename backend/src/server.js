@@ -71,7 +71,18 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+
+// Global error handler to prevent absolute path leakage in stack traces
+app.use((err, req, res, next) => {
+  console.error('[Error]', err.message);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message
+  });
+});
+
 const PORT = process.env.PORT || 3000;
+
 // Deliberately vulnerable app: bind to localhost only unless HOST is set explicitly
 // (Docker sets HOST=0.0.0.0 inside the container; compose publishes it on 127.0.0.1).
 const HOST = process.env.HOST || '127.0.0.1';

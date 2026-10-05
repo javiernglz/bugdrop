@@ -11,8 +11,8 @@ export default function ChallengePanel({ challenges, solved, hints, onGetHint })
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {challenges.map((chal) => {
         const isSolved = (solved || []).includes(chal.challenge_key);
-        // hints is an object keyed by `${challengeKey}-${level}`
-        const hasHint = !!(hints && hints[`${chal.challenge_key}-1`]);
+        const hint1 = hints && hints[`${chal.challenge_key}-1`];
+        const hint2 = hints && hints[`${chal.challenge_key}-2`];
 
         return (
           <div key={chal.challenge_key} style={{
@@ -43,16 +43,30 @@ export default function ChallengePanel({ challenges, solved, hints, onGetHint })
             
             {!isSolved && (
               <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
-                {hasHint ? (
-                  <div style={{ fontSize: '12px', color: 'var(--warning)', backgroundColor: 'var(--bg)', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
-                    <strong>Hint:</strong> {hints[`${chal.challenge_key}-1`]?.hint || 'No hint available.'}
+                {hint1 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--warning)', backgroundColor: 'var(--bg)', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                      <strong>Hint 1:</strong> {hint1.hint}
+                    </div>
+                    {hint2 ? (
+                      <div style={{ fontSize: '12px', color: 'var(--error)', backgroundColor: 'var(--bg)', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                        <strong>Hint 2:</strong> {hint2.hint}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => onGetHint(chal.challenge_key, 2)}
+                        style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline', alignSelf: 'flex-start' }}
+                      >
+                        Reveal Technical Hint
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <button
                     onClick={() => onGetHint(chal.challenge_key, 1)}
                     style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}
                   >
-                    Reveal Hint (-5 pts)
+                    Reveal Hint
                   </button>
                 )}
               </div>
