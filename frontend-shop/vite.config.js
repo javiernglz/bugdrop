@@ -10,6 +10,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': target,
+      '/backup.bak': target,
       '/socket.io': {
         target: target,
         ws: true,
