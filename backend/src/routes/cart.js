@@ -22,22 +22,29 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
       return res.status(400).json({ error: `Product ${item.product_id} not found.` });
     }
 
+    
+    const qty = parseInt(item.quantity) || 1;
+    if (qty <= 0) {
+      return res.status(400).json({ error: 'Quantity must be greater than zero.' });
+    }
+
     // The secret Bug never runs out: otherwise a single normal test purchase would make
+
     // the Cart challenge impossible until the database is reset.
     const unlimitedStock = product.category === 'secret';
 
-    if (!unlimitedStock && product.stock < (item.quantity || 1)) {
+    if (!unlimitedStock && product.stock < qty) {
       return res.status(400).json({ error: `"${product.name}" is out of stock. Another collector got there first.` });
     }
 
     // VULN: usa item.unit_price del request, no product.price de la BD
-    const lineTotal = (item.unit_price || 0) * (item.quantity || 1);
+    const lineTotal = (item.unit_price || 0) * qty;
     total += lineTotal;
 
     validatedItems.push({
       product_id: product.id,
       product_name: product.name,
-      quantity: item.quantity || 1,
+      quantity: qty,
       unit_price: item.unit_price || 0,
       unlimited_stock: unlimitedStock,
     });

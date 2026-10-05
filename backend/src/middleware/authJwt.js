@@ -8,11 +8,34 @@ function getUserFromToken(req) {
 
   if (!token) return null;
 
+  
   try {
     return jwt.verify(token, JWT_SECRET);
-  } catch {
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError' && err.message === 'invalid signature') {
+      const io = req.app?.get('io');
+      if (io) {
+        io.emit('http-log', {
+          id: `log-${Date.now()}-jwt`,
+          timestamp: new Date().toISOString(),
+          method: req.method,
+          url: req.originalUrl || req.url,
+          statusCode: 401,
+          ip: req.ip || '127.0.0.1',
+          userAgent: req.headers['user-agent'] || '',
+          contentType: '',
+          body: null,
+          duration: 1,
+          threats: [{ tag: 'Forged JWT', severity: 'critical', match: 'Invalid signature detected' }],
+          hasThreat: true,
+          maxSeverity: 'critical',
+          responseFlag: null
+        });
+      }
+    }
     return null;
   }
+
 }
 
 function requireAuth(req, res, next) {

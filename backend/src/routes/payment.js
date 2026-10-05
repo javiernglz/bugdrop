@@ -12,6 +12,30 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'Order not found.' });
   }
 
+
+  if (order.user_id !== req.user.id) {
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('http-log', {
+        id: `log-${Date.now()}-idor`,
+        timestamp: new Date().toISOString(),
+        method: 'POST',
+        url: req.originalUrl || req.url,
+        statusCode: 403,
+        ip: req.ip || '127.0.0.1',
+        userAgent: req.headers['user-agent'] || '',
+        contentType: 'application/json',
+        body: req.body,
+        duration: 2,
+        threats: [{ tag: 'IDOR', severity: 'critical', match: 'Attempted to pay order belonging to another user' }],
+        hasThreat: true,
+        maxSeverity: 'critical',
+        responseFlag: null
+      });
+    }
+    return res.status(403).json({ error: 'Forbidden. This is not your order.' });
+  }
+
   if (order.payment_status === 'paid') {
     return res.json({ message: 'This order is already paid.' });
   }

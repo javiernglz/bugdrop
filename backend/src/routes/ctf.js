@@ -12,7 +12,19 @@ router.get('/api/ctf/challenges', (req, res) => {
   res.json({ challenges });
 });
 
+
+const submitTracker = new Map();
+
 router.post('/api/ctf/submit', (req, res) => {
+  const ip = req.ip || '127.0.0.1';
+  const now = Date.now();
+  const lastSubmit = submitTracker.get(ip) || 0;
+  
+  if (now - lastSubmit < 1000) {
+    return res.status(429).json({ error: 'Too many requests. Take a breath, hacker.', rateLimited: true });
+  }
+  submitTracker.set(ip, now);
+
   const db = req.app.get('db');
   const { flag } = req.body;
 

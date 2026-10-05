@@ -131,3 +131,7 @@ This project is strictly educational. Every vulnerability is intentional and doc
 ## License
 
 MIT
+
+
+## Automated Tests & Playwright XSS Bot
+This repository includes automated CI/CD via GitHub actions and a realistic headless Chromium bot (Playwright) that evaluates Stored XSS payloads against the administrator session in the background. The SOC will catch it if successful!

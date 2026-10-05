@@ -90,6 +90,39 @@ app.get('/api/health', (_req, res) => {
 
 
 // Global error handler to prevent absolute path leakage in stack traces
+
+const fuzzingTracker = new Map();
+app.use((req, res, next) => {
+  const ip = req.ip || '127.0.0.1';
+  const now = Date.now();
+  const hits = fuzzingTracker.get(ip) || [];
+  const recentHits = hits.filter(t => now - t < 10000); // 10 seconds
+  recentHits.push(now);
+  fuzzingTracker.set(ip, recentHits);
+
+  if (recentHits.length >= 5) {
+    if (io) {
+      io.emit('http-log', {
+        id: `log-${now}-fuzz`,
+        timestamp: new Date().toISOString(),
+        method: req.method,
+        url: req.originalUrl || req.url,
+        statusCode: 404,
+        ip,
+        userAgent: req.headers['user-agent'] || '',
+        contentType: '',
+        body: null,
+        duration: 1,
+        threats: [{ tag: 'Fuzzing / Enumeration', severity: 'high', match: 'Multiple 404s detected in a short time' }],
+        hasThreat: true,
+        maxSeverity: 'high',
+        responseFlag: null
+      });
+    }
+  }
+  res.status(404).json({ error: 'Endpoint not found' });
+});
+
 app.use((err, req, res, next) => {
   console.error('[Error]', err.message);
   res.status(500).json({
