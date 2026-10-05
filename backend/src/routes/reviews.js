@@ -1,8 +1,7 @@
 const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
-const jwt = require('jsonwebtoken');
 const { requireAuth } = require('../middleware/authJwt');
-const { JWT_SECRET } = require('./auth');
+const { visitPage } = require('../utils/bot');
 const router = Router();
 
 router.post('/api/products/:id/reviews', requireAuth, (req, res) => {
@@ -20,35 +19,29 @@ router.post('/api/products/:id/reviews', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Review cannot be empty. We want to hear your thoughts.' });
   }
 
-  // VULN: content is saved without sanitization — Stored XSS
   const result = db.prepare(
     'INSERT INTO reviews (user_id, product_id, content, rating) VALUES (?, ?, ?, ?)'
   ).run(user.id, product.id, content, rating || 5);
 
   let flag = null;
+  let adminMessage = null;
   const xssPatterns = /<script|javascript:|onerror|onload|onclick|onfocus|onmouseover/i;
   
   if (xssPatterns.test(content)) {
+    // 1. Damos la flag por haber inyectado XSS con éxito
     flag = generateFlag('stored_xss');
-
-    // Simulate stolen admin token
-    const adminData = db.prepare('SELECT id, username, display_name, role FROM users WHERE role = ?').get('admin');
-    const adminToken = adminData
-      ? jwt.sign({ id: adminData.id, username: adminData.username, display_name: adminData.display_name, role: adminData.role }, JWT_SECRET, { expiresIn: '1h' })
-      : null;
-
-    return res.json({
-      message: `Review posted. Admin just reviewed it and... something strange happened with their browser.`,
-      review_id: result.lastInsertRowid,
-      flag: flag ? flag : undefined,
-      stolen_cookie: adminToken,
-      admin_reaction: 'My JWT was intercepted. Someone can impersonate Admin...',
-    });
+    adminMessage = 'Review posted. An Admin will review it shortly. Who knows what might happen if they open it...';
+    
+    // 2. Ejecutamos el bot real en segundo plano para que la víctima (Admin) visite la página
+    // y el payload XSS se ejecute de verdad robando la cookie.
+    const productUrl = `http://localhost:5173/product/${product.id}`;
+    visitPage(productUrl).catch(err => console.error("Bot failed:", err));
   }
 
   res.json({
-    message: `Review posted for "${product.name}". Thanks for your feedback, Collector.`,
+    message: adminMessage || `Review posted for "${product.name}". Thanks for your feedback, Collector.`,
     review_id: result.lastInsertRowid,
+    flag: flag ? flag : undefined
   });
 });
 

@@ -40,6 +40,15 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
     });
   }
 
+  
+  if (status === 'declined') {
+    return res.status(400).json({
+      error: 'Card declined by the payment gateway.',
+      hint: 'The gateway rejected your card. Is there a way to bypass the gateway and tell the server it was a success directly?',
+      payment_status: 'failed',
+    });
+  }
+
   if (status === 'pending') {
     return res.json({
       message: 'Payment pending. Waiting for bank confirmation.',

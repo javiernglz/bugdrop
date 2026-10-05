@@ -58,7 +58,9 @@ export default function Orders() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ status: 'success' }),
+      // In a real app, this would redirect to Stripe.
+      // But here, the gateway always 'fails' for honest users!
+      body: JSON.stringify({ status: 'declined', error: 'insufficient_funds' }),
     });
     const data = await res.json();
     setPayResult(data);

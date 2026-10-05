@@ -23,7 +23,7 @@ const insertUser = db.prepare(`
 `);
 
 const users = [
-  ['bugdrop_admin', 'password123', 'Admin', 'admin',
+  ['bugdrop_admin', 'V3ryC0mpl3xP@ssw0rd!_Unkr4ck4bl3', 'Admin', 'admin',
     'Lead designer at Bugdrop. I know where the molds are kept.',
     'admin-token-super-secreto-12345'],
   ['collector_42', 'bugdrop2024', 'Collector #42', 'collector',

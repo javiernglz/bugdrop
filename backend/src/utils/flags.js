@@ -1,9 +1,18 @@
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
-// [ROBUST ARCHITECTURE FIX]
-// Instead of a random secret on every startup (which invalidates all user flags if the server reboots),
-// we use a deterministic secret for this educational environment.
-const INSTANCE_SECRET = 'BUGDROP_CTF_MASTER_SECRET_2026';
+const secretPath = path.join(__dirname, '..', '..', '.ctf_secret');
+
+let INSTANCE_SECRET;
+
+if (fs.existsSync(secretPath)) {
+  INSTANCE_SECRET = fs.readFileSync(secretPath, 'utf8').trim();
+} else {
+  INSTANCE_SECRET = crypto.randomBytes(32).toString('hex');
+  fs.writeFileSync(secretPath, INSTANCE_SECRET, 'utf8');
+  console.log('🛡️  Generated new CTF Master Secret for flags.');
+}
 
 function generateFlag(challengeKey) {
   const hmac = crypto.createHmac('sha256', INSTANCE_SECRET);
