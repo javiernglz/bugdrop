@@ -1,4 +1,3 @@
-const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
 const { requireAuth } = require('../middleware/authJwt');
 const { visitPage } = require('../utils/bot');
@@ -23,25 +22,23 @@ router.post('/api/products/:id/reviews', requireAuth, (req, res) => {
     'INSERT INTO reviews (user_id, product_id, content, rating) VALUES (?, ?, ?, ?)'
   ).run(user.id, product.id, content, rating || 5);
 
-  let flag = null;
+  const xssPatterns = /<img|<script|<svg|<iframe|<body/i;
   let adminMessage = null;
-  const xssPatterns = /<script|javascript:|onerror|onload|onclick|onfocus|onmouseover/i;
-  
+
   if (xssPatterns.test(content)) {
-    // 1. Damos la flag por haber inyectado XSS con éxito
-    flag = generateFlag('stored_xss');
     adminMessage = 'Review posted. An Admin will review it shortly. Who knows what might happen if they open it...';
     
-    // 2. Ejecutamos el bot real en segundo plano para que la víctima (Admin) visite la página
-    // y el payload XSS se ejecute de verdad robando la cookie.
-    const productUrl = `http://localhost:5173/product/${product.id}`;
+    // El puerto 5173 es el frontend shop por defecto. En Docker será 'shop:5173'
+    const shopHost = process.env.SHOP_HOST || 'localhost:5173';
+    const productUrl = `http://${shopHost}/products/${product.id}`;
+    
+    // Lanzar el bot en segundo plano
     visitPage(productUrl).catch(err => console.error("Bot failed:", err));
   }
 
   res.json({
     message: adminMessage || `Review posted for "${product.name}". Thanks for your feedback, Collector.`,
-    review_id: result.lastInsertRowid,
-    flag: flag ? flag : undefined
+    review_id: result.lastInsertRowid
   });
 });
 

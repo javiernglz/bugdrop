@@ -59,7 +59,7 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
   }
 
   let flag_value = null;
-  const hasSecretBug = validatedItems.some(i => i.product_id === 11);
+  const hasSecretBug = validatedItems.some(i => i.product_id === 12);
   if (hasSecretBug && total <= 0) {
     flag_value = generateFlag('cart_manipulation');
   }

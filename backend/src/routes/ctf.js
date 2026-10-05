@@ -79,4 +79,39 @@ router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
   res.status(400).json({ error: 'Invalid hint level. Use 1 (conceptual) or 2 (technical).' });
 });
 
+
+router.get('/api/ctf/collector', (req, res) => {
+  const { c } = req.query;
+  const io = req.app.get('io');
+  
+  if (!c) return res.send('OK');
+
+  let flag = null;
+  // If the exfiltrated cookie contains the admin JWT or any admin hint
+  if (c.includes('eyJ') || c.includes('admin')) {
+    flag = generateFlag('stored_xss');
+    if (io) {
+      io.emit('http-log', {
+        id: `log-${Date.now()}-exfil`,
+        timestamp: new Date().toISOString(),
+        method: 'GET',
+        url: '/api/ctf/collector',
+        statusCode: 200,
+        ip: req.ip || '127.0.0.1',
+        userAgent: 'VictimBrowser/1.0',
+        contentType: '',
+        body: null,
+        duration: 1,
+        threats: [{ tag: 'Exfiltration', severity: 'critical', match: 'Cookie stolen' }],
+        hasThreat: true,
+        maxSeverity: 'critical',
+        responseFlag: flag
+      });
+    }
+  }
+
+  res.json({ status: 'logged', received: c, flag: flag });
+});
+
 module.exports = router;
+

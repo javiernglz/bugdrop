@@ -9,12 +9,13 @@
     "dev:shop": "cd frontend-shop && npm run dev",
     "dev:soc": "cd frontend-soc && npm run dev",
     "seed": "cd backend && npm run seed",
-    "install:all": "cd backend && npm install && cd ../frontend-shop && npm install && cd ../frontend-soc && npm install",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend-shop && npm install && cd ../frontend-soc && npm install",
     "test": "node tests/test_challenges.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "jsonwebtoken": "^9.0.3"
   },
   "keywords": [
     "ctf",
