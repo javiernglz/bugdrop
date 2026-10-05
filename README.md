@@ -98,7 +98,7 @@ npm run dev
 - **Backend**: Node.js, Express, SQLite (better-sqlite3), Socket.io, JWT
 - **Shop frontend**: React 19, Vite, Tailwind CSS 4
 - **SOC frontend**: React 19, Vite, Tailwind CSS 4, Recharts, Canvas Confetti
-- **Orchestration**: Concurrently for development, Docker Compose for production
+- **Orchestration**: Concurrently for local development, Docker Compose for containerized environment
 
 ## Project structure
 

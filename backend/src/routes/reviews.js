@@ -1,3 +1,4 @@
+const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
 const jwt = require('jsonwebtoken');
 const { requireAuth } = require('../middleware/authJwt');
@@ -28,7 +29,7 @@ router.post('/api/products/:id/reviews', requireAuth, (req, res) => {
   const xssPatterns = /<script|javascript:|onerror|onload|onclick|onfocus|onmouseover/i;
   
   if (xssPatterns.test(content)) {
-    flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('stored_xss');
+    flag = generateFlag('stored_xss');
 
     // Simulate stolen admin token
     const adminData = db.prepare('SELECT id, username, display_name, role FROM users WHERE role = ?').get('admin');
@@ -39,7 +40,7 @@ router.post('/api/products/:id/reviews', requireAuth, (req, res) => {
     return res.json({
       message: `Review posted. Admin just reviewed it and... something strange happened with their browser.`,
       review_id: result.lastInsertRowid,
-      flag: flag ? flag.flag_value : undefined,
+      flag: flag ? flag : undefined,
       stolen_cookie: adminToken,
       admin_reaction: 'My JWT was intercepted. Someone can impersonate Admin...',
     });

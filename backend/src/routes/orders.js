@@ -1,3 +1,4 @@
+const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
 const { requireAuth } = require('../middleware/authJwt');
 const router = Router();
@@ -42,13 +43,13 @@ router.get('/api/orders/:id', requireAuth, (req, res) => {
 
   let flag = null;
   if (order.user_id === 1 && user.id !== 1) {
-    flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('idor_orders');
+    flag = generateFlag('idor_orders');
   }
 
   res.json({
     order,
     items,
-    flag: flag ? flag.flag_value : undefined,
+    flag: flag ? flag : undefined,
     hacked_message: flag
       ? `You just accessed ${order.display_name}'s TOP SECRET order details! That should not be possible...`
       : undefined,

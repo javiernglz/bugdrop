@@ -111,7 +111,7 @@ const insertOrderItem = db.prepare(`
 // Pedido 1: Admin (Admin) — contiene los planos secretos (bandera IDOR)
 const order1 = insertOrder.run(
   1, 'completed', 'paid', 752500000,
-  Buffer.from('8J+aqCBJTlRFUk5BTCBPTkxZIPCfmqggUHJvZHVjdGlvbiBtb2xkcyBmb3IgQnVnID8/Py4gRmFjdG9yeSBjb29yZGluYXRlczogNDcuMTIzNMKwTiwgMTcyLjU2NzjCsFcuIEFjY2VzcyBDb2RlOiBGTEFHe2lkb3JfbGVha2VkX2ZhY3RvcnlfbW9sZHN9LiBETyBOT1QgU0hBUkUgT1VUU0lERSBERVNJR04gVEVBTS4=', 'base64').toString('utf-8')
+  '🚨 INTERNAL ONLY 🚨 Production molds for Bug ???. Factory coordinates: 47.1234°N, 172.5678°W. Access Code: ' + generateFlag('idor_orders') + '. DO NOT SHARE OUTSIDE DESIGN TEAM.'
 );
 insertOrderItem.run(order1.lastInsertRowid, 12, 1, 999);
 
@@ -162,7 +162,7 @@ for (const r of reviews) {
 // ═══════════════════════════════════════
 const insertFlag = db.prepare(`
   INSERT INTO flags (challenge_key, title, description, difficulty, hints_level1, hints_level2)
-  VALUES (?, ?, ?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?)
 `);
 
 const flags = [

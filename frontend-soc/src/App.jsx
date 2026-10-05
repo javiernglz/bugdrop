@@ -4,6 +4,7 @@ import LogConsole from './components/LogConsole';
 import TrafficCharts from './components/TrafficCharts';
 import ChallengePanel from './components/ChallengePanel';
 import FlagInput from './components/FlagInput';
+import PanicButton from './components/PanicButton';
 import StatsBar from './components/StatsBar';
 
 export default function App() {
@@ -87,22 +88,7 @@ export default function App() {
             <FlagInput onSubmit={submitFlag} />
             <ChallengePanel challenges={challenges} solved={solved} hints={hints} onGetHint={getHint} />
             
-            <button
-              onClick={resetProgress}
-              style={{
-                marginTop: 'auto',
-                padding: '12px',
-                backgroundColor: 'transparent',
-                border: '1px solid var(--border)',
-                color: 'var(--text-muted)',
-                borderRadius: '6px',
-                fontSize: '11px',
-                cursor: 'pointer',
-                textAlign: 'center'
-              }}
-            >
-              Reset CTF Progress
-            </button>
+            <PanicButton onResetCtf={resetProgress} />
           </div>
 
         </div>

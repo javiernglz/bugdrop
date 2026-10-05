@@ -24,7 +24,8 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
 
     let flag = null;
     if (order.total_price > 0) {
-      flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('payment_bypass');
+      const flag_value = generateFlag('payment_bypass');
+      flag = flag_value;
     }
 
     return res.json({
@@ -35,7 +36,7 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
       payment_status: 'paid',
       total: order.total_price,
       transaction_id: transaction_id || `FAKE-${Date.now()}`,
-      flag: flag_value,
+      flag: flag,
     });
   }
 
