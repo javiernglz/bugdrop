@@ -1,0 +1,35 @@
+name: Bugdrop CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm run install:all
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+
+    - name: Start Servers
+      run: npm run dev &
+      
+    - name: Wait for backend
+      run: npx wait-on http://localhost:3000/api/sys/status
+
+    - name: Run E2E Tests
+      run: npm test

@@ -1,18 +1,14 @@
 const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
-const { execSync } = require('child_process');
-const path = require('path');
+const { runSeed } = require('../db/seed');
 const router = Router();
 
 router.post('/api/sys/reset', (req, res) => {
   const io = req.app.get('io');
 
   try {
-    const seedPath = path.join(__dirname, '..', 'db', 'seed.js');
-    execSync(`node "${seedPath}"`, {
-      cwd: path.join(__dirname, '..', '..'),
-      timeout: 10000,
-    });
+    // Run the DB reset in the same process to avoid locking issues
+    runSeed();
 
     if (io) {
       io.emit('system-event', {
@@ -63,13 +59,9 @@ router.post('/api/newsletter', (req, res) => {
     return res.status(400).json({ error: 'Email required' });
   }
 
-  // VULN: Basic SQL Injection in the newsletter form
-  // An attacker can input: admin' OR '1'='1
   try {
-    // We intentionally do a raw query string concat
     const result = db.prepare(`SELECT * FROM users WHERE username = '${email}'`).get();
     
-    // If the query magically returns the admin user due to SQLi:
     if (result && result.role === 'admin') {
       const flag_value = generateFlag('sqli_newsletter');
       return res.json({ 
@@ -84,7 +76,6 @@ router.post('/api/newsletter', (req, res) => {
       coupon: 'BUGDROP10'
     });
   } catch (err) {
-    // Leaks the SQL error to make the vulnerability obvious
     res.status(500).json({ 
       error: 'Database error', 
       details: err.message,
@@ -110,4 +101,3 @@ DEBUG=true
   res.setHeader('Content-type', 'text/plain');
   res.send(fileContent);
 });
-
