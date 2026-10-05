@@ -34,14 +34,25 @@ function socInterceptor(req, res, next) {
   const startTime = Date.now();
 
   const originalJson = res.json.bind(res);
+  const originalSend = res.send.bind(res);
   let responseBody = null;
+  let flagFoundInText = null;
 
   res.json = function (body) {
     responseBody = body;
     return originalJson(body);
   };
 
+  res.send = function (body) {
+    if (typeof body === 'string' && body.includes('FLAG{')) {
+      const match = body.match(/FLAG\{[a-f0-9]+\}/);
+      if (match) flagFoundInText = match[0];
+    }
+    return originalSend(body);
+  };
+
   res.on('finish', () => {
+
     const duration = Date.now() - startTime;
 
     const rawBody = JSON.stringify(req.body || {});
@@ -68,7 +79,8 @@ function socInterceptor(req, res, next) {
         ? threats.reduce((max, t) =>
             t.severity === 'critical' ? 'critical' : max === 'critical' ? 'critical' : t.severity, 'low')
         : null,
-      responseFlag: responseBody?.flag || null,
+      responseFlag: responseBody?.flag || flagFoundInText || null,
+
     };
 
     io.emit('http-log', logEntry);

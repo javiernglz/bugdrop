@@ -12,6 +12,7 @@
     "install:all": "cd backend && npm install && cd ../frontend-shop && npm install && cd ../frontend-soc && npm install"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "concurrently": "^9.1.2"
   },
   "keywords": [

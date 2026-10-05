@@ -1,8 +1,9 @@
 const crypto = require('crypto');
 
-// Generate a random instance secret on startup.
-// This secret persists across DB resets (Panic Button) so players don't lose their flags.
-const INSTANCE_SECRET = crypto.randomBytes(32).toString('hex');
+// [ROBUST ARCHITECTURE FIX]
+// Instead of a random secret on every startup (which invalidates all user flags if the server reboots),
+// we use a deterministic secret for this educational environment.
+const INSTANCE_SECRET = 'BUGDROP_CTF_MASTER_SECRET_2026';
 
 function generateFlag(challengeKey) {
   const hmac = crypto.createHmac('sha256', INSTANCE_SECRET);

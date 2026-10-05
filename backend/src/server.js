@@ -32,8 +32,25 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+
 const db = getDb();
 initTables(db);
+
+// [AUTO-SEED FIX] Check if DB is empty, run seed automatically
+const checkEmpty = db.prepare('SELECT COUNT(*) as count FROM products').get().count;
+if (checkEmpty === 0) {
+  console.log('⚠️  Database is empty. Auto-seeding initial data...');
+  try {
+    require('child_process').execSync('npm run seed', { 
+      stdio: 'inherit', 
+      cwd: require('path').resolve(__dirname, '..') 
+    });
+    console.log('✅ Auto-seed complete!');
+  } catch(err) {
+    console.error('❌ Auto-seed failed:', err.message);
+  }
+}
+
 
 app.set('io', io);
 app.set('db', db);

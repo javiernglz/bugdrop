@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { AlertTriangle } from 'lucide-react';
 
 export default function PanicButton({ onResetCtf }) {
   const [confirming, setConfirming] = useState(false);
@@ -21,12 +23,12 @@ export default function PanicButton({ onResetCtf }) {
 
       if (data.success) {
         onResetCtf();
-        setResult({ ok: true, msg: 'BD restaurada. Progreso CTF reseteado.' });
+        setResult({ ok: true, msg: 'Environment restored. CTF reset.' });
       } else {
-        setResult({ ok: false, msg: data.message || 'Error al resetear.' });
+        setResult({ ok: false, msg: data.message || 'Error resetting.' });
       }
     } catch {
-      setResult({ ok: false, msg: 'No se pudo conectar al backend.' });
+      setResult({ ok: false, msg: 'Connection to backend failed.' });
     }
 
     setResetting(false);
@@ -34,39 +36,48 @@ export default function PanicButton({ onResetCtf }) {
   }
 
   return (
-    <div className="bg-[#111128] rounded-xl border border-gray-800 p-4">
-      <h3 className="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-3">
-        Botón de Pánico
-      </h3>
-      <p className="text-[10px] text-gray-600 mb-3">
-        Restaura la base de datos al estado original y resetea tu progreso CTF.
+    <div className="p-5 panel-base border-[var(--error)]/20 bg-[var(--error)]/5">
+      <div className="flex items-center gap-2 mb-2">
+        <AlertTriangle size={16} className="text-[var(--error)]" />
+        <h3 className="text-[11px] font-bold text-[var(--error)] uppercase tracking-widest m-0">
+          Panic Button
+        </h3>
+      </div>
+      <p className="text-xs text-[var(--text-muted)] mb-4 leading-relaxed">
+        Wipes the database, restarts the backend seed, and resets your CTF progress permanently.
       </p>
-      <button
+      
+      <motion.button
+        whileHover={!resetting ? { scale: 1.02 } : {}}
+        whileTap={!resetting ? { scale: 0.98 } : {}}
         onClick={handleReset}
         disabled={resetting}
-        className={`w-full py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition border ${
+        className={`w-full py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm ${
           resetting
-            ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-wait'
+            ? 'bg-[var(--border)] text-[var(--text-faint)] cursor-wait'
             : confirming
-              ? 'bg-red-800 border-red-600 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]'
-              : 'bg-red-900/30 border-red-800/50 text-red-400 hover:bg-red-900/50 hover:border-red-700'
+              ? 'bg-[var(--error)] text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+              : 'bg-transparent border border-[var(--error)]/50 text-[var(--error)] hover:bg-[var(--error)] hover:text-white'
         }`}
       >
         {resetting
-          ? 'Reseteando...'
+          ? 'Resetting...'
           : confirming
-            ? '¿Confirmar? Haz clic otra vez'
-            : 'Resetear Entorno'}
-      </button>
+            ? 'Confirm Wipe?'
+            : 'Reset Environment'}
+      </motion.button>
 
       {result && (
-        <div className={`mt-2 rounded-lg px-3 py-2 text-[10px] border ${
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mt-3 rounded-lg px-3 py-2 text-[10px] font-mono border ${
           result.ok
-            ? 'bg-green-900/20 border-green-800/50 text-green-400'
-            : 'bg-red-900/20 border-red-800/50 text-red-400'
+            ? 'bg-[var(--success)]/10 border-[var(--success)]/30 text-[var(--success)]'
+            : 'bg-[var(--error)]/10 border-[var(--error)]/30 text-[var(--error)]'
         }`}>
           {result.msg}
-        </div>
+        </motion.div>
       )}
     </div>
   );
