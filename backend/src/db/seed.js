@@ -10,7 +10,7 @@ db.exec('DROP TABLE IF EXISTS products');
 db.exec('DROP TABLE IF EXISTS users');
 db.exec('DROP TABLE IF EXISTS flags');
 // Drop the old ones just in case
-db.exec('DROP TABLE IF EXISTS villains');
+db.exec('DROP TABLE IF EXISTS bugdrops');
 
 initTables(db);
 
@@ -26,7 +26,7 @@ const users = [
   ['bugdrop_admin', 'password123', 'Admin', 'admin',
     'Lead designer at Bugdrop. I know where the molds are kept.',
     'admin-token-super-secreto-12345'],
-  ['minion_42', 'esbirro2024', 'Collector #42', 'collector',
+  ['collector_42', 'bugdrop2024', 'Collector #42', 'collector',
     'Verified Buyer. Has 14 complete sets.',
     null],
   ['lady_caos', 'chaos666', 'Lady Caos', 'collector',
@@ -35,7 +35,7 @@ const users = [
   ['prof_doom', 'doom1234', 'Prof. Doom', 'collector',
     'Bulk Buyer. Buys out stock every drop.',
     null],
-  ['hacker_fantasma', 'ghost_in_shell', 'The Ghost', 'collector',
+  ['cyber_ninja', 'ghost_in_shell', 'The Ghost', 'collector',
     'Anonymous Collector. Ships to a PO Box.',
     null],
 ];

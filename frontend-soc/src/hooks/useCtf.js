@@ -4,14 +4,14 @@ export default function useCtf() {
   const [challenges, setChallenges] = useState([]);
   const [solved, setSolved] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('pwn-shop-solved') || '[]');
+      return JSON.parse(localStorage.getItem('bugdrop-solved') || '[]');
     } catch {
       return [];
     }
   });
   const [hints, setHints] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('pwn-shop-hints') || '{}');
+      return JSON.parse(localStorage.getItem('bugdrop-hints') || '{}');
     } catch {
       return {};
     }
@@ -24,11 +24,11 @@ export default function useCtf() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('pwn-shop-solved', JSON.stringify(solved));
+    localStorage.setItem('bugdrop-solved', JSON.stringify(solved));
   }, [solved]);
 
   useEffect(() => {
-    localStorage.setItem('pwn-shop-hints', JSON.stringify(hints));
+    localStorage.setItem('bugdrop-hints', JSON.stringify(hints));
   }, [hints]);
 
   const submitFlag = useCallback(async (flag) => {
@@ -64,8 +64,8 @@ export default function useCtf() {
   const resetProgress = useCallback(() => {
     setSolved([]);
     setHints({});
-    localStorage.removeItem('pwn-shop-solved');
-    localStorage.removeItem('pwn-shop-hints');
+    localStorage.removeItem('bugdrop-solved');
+    localStorage.removeItem('bugdrop-hints');
   }, []);
 
   return {

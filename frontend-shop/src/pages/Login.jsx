@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const COLLECTOR_ACCOUNTS = [
-  { username: 'minion_42', password: 'esbirro2024', hint: 'Collector #42 — Verified Buyer' },
+  { username: 'collector_42', password: 'bugdrop2024', hint: 'Collector #42 — Verified Buyer' },
   { username: 'lady_caos', password: 'chaos666', hint: 'Lady Caos — Early Adopter' },
   { username: 'prof_doom', password: 'doom1234', hint: 'Prof. Doom — Bulk Buyer' },
   { username: 'hacker_fantasma', password: 'ghost_in_shell', hint: 'The Ghost — Anonymous Collector' },
