@@ -13,5 +13,13 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
-  }
+  },
+  "keywords": [
+    "ctf",
+    "bug-bounty",
+    "vulnerable-app",
+    "docker",
+    "soc",
+    "cybersecurity"
+  ]
 }

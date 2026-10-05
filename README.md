@@ -2,16 +2,13 @@
 
 A dual-interface cyber range for learning pentesting and bug bounty from scratch.
 
-Bugdrop is a training environment built around a deliberately vulnerable e-commerce store — a fictional collectible figures brand — paired with a real-time monitoring dashboard (Mini-SOC) that tracks every attack as it happens. Six CTF challenges are baked into the store, each exposing a different class of web vulnerability.
+Bugdrop is a training environment built around a deliberately vulnerable e-commerce store — a fictional collectible figures brand — paired with a real-time monitoring dashboard (Mini-SOC) that tracks every attack as it happens. Seven CTF challenges are baked into the store, each exposing a different class of web vulnerability.
 
-## Screenshots
-*(Añade aquí un par de capturas de pantalla de la tienda y del SOC)*
-<!-- ![Bugdrop Store](docs/storefront.png) -->
-<!-- ![Bugdrop SOC](docs/soc.png) -->
+
 
 ## Key Features
 - **3D Art Toy Aesthetic:** A premium, fully custom-designed frontend that breaks the mold of typical boring CTF environments.
-- **Interactive AI Tutorials:** In-app floating avatars (Driver.js) guide beginners through the interface and hacking basics.
+- **Interactive Guided Tours:** In-app floating avatars (powered by Driver.js) guide beginners through the interface and hacking basics.
 - **Real-Time SOC Dashboard:** Watch your HTTP traffic, detected XSS/SQLi threats, and submit flags in a live React dashboard powered by WebSockets.
 - **Story-Driven CTF:** Play the role of a rogue collector trying to infiltrate the Admin's secret panel and steal the master factory molds.
 

@@ -93,3 +93,20 @@ router.post('/api/newsletter', (req, res) => {
 });
 
 module.exports = router;
+
+// VULN: Information Disclosure (Backup file left on server)
+router.get('/backup.bak', (req, res) => {
+  const db = req.app.get('db');
+  const flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('info_disclosure');
+  const fileContent = `DB_CONNECTION=sqlite
+DB_DATABASE=bugdrop.db
+ADMIN_EMAIL=admin@bugdrop.local
+FLAG=${flag ? flag.flag_value : 'FLAG_NOT_FOUND'}
+DEBUG=true
+`;
+  
+  res.setHeader('Content-disposition', 'attachment; filename=backup.bak');
+  res.setHeader('Content-type', 'text/plain');
+  res.send(fileContent);
+});
+
