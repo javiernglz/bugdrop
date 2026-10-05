@@ -6,3 +6,10 @@ dist/
 .env
 .DS_Store
 venv/
+
+# Scripts and Artifacts
+*.zip
+commits.txt
+fix_*.py
+clean_*.py
+*_crop*.py
