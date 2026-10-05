@@ -1,3 +1,4 @@
+const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
 const { requireAuth } = require('../middleware/authJwt');
 const router = Router();
@@ -57,10 +58,10 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
     }
   }
 
-  let flag = null;
+  let flag_value = null;
   const hasSecretBug = validatedItems.some(i => i.product_id === 12);
   if (hasSecretBug && total <= 0) {
-    flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('cart_manipulation');
+    flag_value = generateFlag('cart_manipulation');
   }
 
   res.json({
@@ -70,7 +71,7 @@ router.post('/api/cart/checkout', requireAuth, (req, res) => {
     order_id: order.lastInsertRowid,
     total,
     items: validatedItems,
-    flag: flag ? flag.flag_value : undefined,
+    flag: flag_value,
   });
 });
 

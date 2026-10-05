@@ -1,3 +1,4 @@
+const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
 const { requireAuth } = require('../middleware/authJwt');
 
@@ -11,7 +12,7 @@ router.get('/api/admin/dashboard', requireAuth, (req, res) => {
     return res.status(403).json({ error: 'Access Denied. Admin only.' });
   }
 
-  const flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('admin_panel');
+  const flag_value = generateFlag('admin_panel');
 
   res.json({
     message: 'Welcome to the inner sanctum, Admin.',
@@ -20,7 +21,7 @@ router.get('/api/admin/dashboard', requireAuth, (req, res) => {
       active_molds: 12,
       pending_shipments: 420
     },
-    flag: flag ? flag.flag_value : 'FLAG_NOT_FOUND'
+    flag: flag_value
   });
 });
 

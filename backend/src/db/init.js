@@ -69,7 +69,7 @@ function initTables(db) {
     CREATE TABLE IF NOT EXISTS flags (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       challenge_key TEXT UNIQUE NOT NULL,
-      flag_value TEXT UNIQUE NOT NULL,
+      
       title TEXT NOT NULL,
       description TEXT NOT NULL,
       difficulty TEXT DEFAULT 'medium',

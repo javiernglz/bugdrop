@@ -1,3 +1,4 @@
+const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
 const router = Router();
 
@@ -19,7 +20,16 @@ router.post('/api/ctf/submit', (req, res) => {
     return res.status(400).json({ error: 'Submit a flag to verify your finding.' });
   }
 
-  const match = db.prepare('SELECT * FROM flags WHERE flag_value = ?').get(flag.trim());
+  
+  const challenges = db.prepare('SELECT * FROM flags').all();
+  let match = null;
+  for (const ch of challenges) {
+    if (generateFlag(ch.challenge_key) === flag.trim()) {
+      match = ch;
+      break;
+    }
+  }
+
 
   if (match) {
     return res.json({

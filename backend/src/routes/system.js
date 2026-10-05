@@ -1,3 +1,4 @@
+const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
 const { execSync } = require('child_process');
 const path = require('path');
@@ -70,11 +71,11 @@ router.post('/api/newsletter', (req, res) => {
     
     // If the query magically returns the admin user due to SQLi:
     if (result && result.role === 'admin') {
-      const flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('sqli_newsletter');
+      const flag_value = generateFlag('sqli_newsletter');
       return res.json({ 
         message: 'Subscribed as admin? That is unexpected.', 
         coupon: 'ADMIN-DROP-100',
-        flag: flag ? flag.flag_value : undefined
+        flag: flag_value
       });
     }
 
@@ -97,11 +98,11 @@ module.exports = router;
 // VULN: Information Disclosure (Backup file left on server)
 router.get('/backup.bak', (req, res) => {
   const db = req.app.get('db');
-  const flag = db.prepare('SELECT flag_value FROM flags WHERE challenge_key = ?').get('info_disclosure');
+  const flag_value = generateFlag('info_disclosure');
   const fileContent = `DB_CONNECTION=sqlite
 DB_DATABASE=bugdrop.db
 ADMIN_EMAIL=admin@bugdrop.local
-FLAG=${flag ? flag.flag_value : 'FLAG_NOT_FOUND'}
+FLAG=${flag_value}
 DEBUG=true
 `;
   

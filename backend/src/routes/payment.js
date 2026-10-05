@@ -1,3 +1,4 @@
+const { generateFlag } = require('../utils/flags');
 const { Router } = require('express');
 const { requireAuth } = require('../middleware/authJwt');
 const router = Router();
@@ -34,7 +35,7 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
       payment_status: 'paid',
       total: order.total_price,
       transaction_id: transaction_id || `FAKE-${Date.now()}`,
-      flag: flag ? flag.flag_value : undefined,
+      flag: flag_value,
     });
   }
 
