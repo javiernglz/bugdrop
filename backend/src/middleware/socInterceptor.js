@@ -10,6 +10,7 @@ const SUSPICIOUS_PATTERNS = [
   { pattern: /;\s*--/i, tag: 'SQLi', severity: 'high' },
   { pattern: /\.\.\/|\.\.%2f/i, tag: 'Path Traversal', severity: 'high' },
   { pattern: /etc\/passwd/i, tag: 'Path Traversal', severity: 'critical' },
+  { pattern: /backup\.bak/i, tag: 'Info Disclosure', severity: 'high' },
   { pattern: /\$\{.*\}/i, tag: 'Template Injection', severity: 'high' },
   { pattern: /"price"\s*:\s*(-\d+|0\b)/i, tag: 'Price Tampering', severity: 'critical' },
   { pattern: /"unit_price"\s*:\s*(-\d+|0\b)/i, tag: 'Price Tampering', severity: 'critical' },
