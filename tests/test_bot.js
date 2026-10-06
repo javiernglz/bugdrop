@@ -38,8 +38,12 @@ async function run() {
   console.log(`✅ bot.available is exposed: ${statusRes.data.bot.available}`);
   
   if (!statusRes.data.bot.available) {
-    console.log('⚠️  Playwright not available, skipping remaining tests.');
-    return;
+    if (process.env.SKIP_BOT_TEST === '1') {
+      console.log('⚠️  Playwright not available, skipping remaining tests (SKIP_BOT_TEST=1).');
+      return;
+    } else {
+      throw new Error('Bot is not available. Playwright/Chromium must be installed, or run with SKIP_BOT_TEST=1');
+    }
   }
 
   // 2. Fetch to localhost:9999 is aborted, but collector is logged.
@@ -104,11 +108,23 @@ async function run() {
     }, userToken).catch(() => {});
   }
   
-  console.log('✅ Burst sent. Check backend logs for concurrency and queue dropping.');
+  await new Promise(r => setTimeout(r, 500)); // wait for queue to process a bit
+  
+  const statusRes2 = await request('GET', '/api/sys/status');
+  const b = statusRes2.data.bot;
+  console.log(`Bot status after burst: running=${b.running}, queued=${b.queued}, dropped=${b.dropped}`);
+  
+  if (b.running > 1) throw new Error(`Too many running: ${b.running}`);
+  if (b.queued > 3) throw new Error(`Too many queued: ${b.queued}`);
+  if (b.dropped < 1) throw new Error(`No visits dropped (should be >= 1): dropped=${b.dropped}`);
+  
+  console.log('✅ Queue concurrency and limits respected.');
   console.log('--- ALL BOT TESTS COMPLETED ---');
 }
 
-run().catch(err => {
+run().then(() => {
+  process.exit(0);
+}).catch(err => {
   console.error('❌ Bot test failed:', err);
   process.exit(1);
 });

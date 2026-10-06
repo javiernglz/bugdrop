@@ -4,7 +4,7 @@ const { Router } = require('express');
 const { runSeed } = require('../db/seed');
 const router = Router();
 
-router.post('/api/sys/reset', rateLimit({ windowMs: 10000, max: 1 }), (req, res) => {
+const checkResetPreconditions = (req, res, next) => {
   const allowReset = process.env.ALLOW_RESET !== 'false';
   if (!allowReset) {
     return res.status(403).json({ error: 'Reset is disabled in this environment.' });
@@ -13,7 +13,10 @@ router.post('/api/sys/reset', rateLimit({ windowMs: 10000, max: 1 }), (req, res)
   if (req.headers['x-bugdrop-client'] !== 'soc') {
     return res.status(403).json({ error: 'Missing or invalid X-Bugdrop-Client header.' });
   }
+  next();
+};
 
+router.post('/api/sys/reset', checkResetPreconditions, rateLimit({ windowMs: 10000, max: 1 }), (req, res) => {
   const io = req.app.get('io');
 
   try {
@@ -56,7 +59,7 @@ router.get('/api/sys/status', (req, res) => {
     status: 'operational',
     database: counts,
     uptime: process.uptime(),
-    bot: { available: require('../utils/bot').getStatus() },
+    bot: require('../utils/bot').getStatus(),
     timestamp: new Date().toISOString(),
   });
 });
@@ -94,14 +97,14 @@ router.post('/api/newsletter', (req, res) => {
   }
 });
 
-module.exports = router;
-
 router.get('/backup.bak', (req, res) => {
   const db = req.app.get('db');
   const flag_value = generateFlag('info_disclosure');
-  const fileContent = `DB_CONNECTION=sqlite\nDB_DATABASE=bugdrop.db\nADMIN_EMAIL=admin@bugdrop.local\nFLAG=${flag_value}\nDEBUG=true\n`;
+  const fileContent = `# VULN: Sensitive backup file exposed\nDB_CONNECTION=sqlite\nDB_DATABASE=bugdrop.db\nADMIN_EMAIL=admin@bugdrop.local\nFLAG=${flag_value}\nDEBUG=true\n`;
   
   res.setHeader('Content-disposition', 'attachment; filename=backup.bak');
   res.setHeader('Content-type', 'text/plain');
   res.send(fileContent);
 });
+
+module.exports = router;
