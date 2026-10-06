@@ -29,27 +29,29 @@ async function run() {
   assert.strictEqual(res.status, 429, 'Second reset immediately should be 429');
   
   // 4. Progress lists a flag sent, empty after reset
-  // First, we need to send a flag. We can fetch one from db.
-  const dbPath = process.env.DATA_DIR ? `${process.env.DATA_DIR}/bugdrop.db` : require('path').join(__dirname, '..', 'backend', 'bugdrop.db');
-  const Database = require('../backend/node_modules/better-sqlite3');
-  const db = new Database(dbPath);
+  const loginRes = await request('POST', '/api/auth/login', { username: 'collector_42', password: 'bugdrop2024' });
+  const userToken = loginRes.data.token;
   
-  const generateFlag = require('../backend/src/utils/flags').generateFlag;
-  const flag = generateFlag('cart_manipulation');
+  await request('POST', '/api/cart', { product_id: 1, quantity: 1 }, { 'Authorization': `Bearer ${userToken}` });
+
+  const ch1Res = await request('POST', '/api/cart/checkout', { items: [{ product_id: 12, quantity: 1, unit_price: 0 }] }, { 'Authorization': `Bearer ${userToken}` });
+  const flagMatch = JSON.stringify(ch1Res.data).match(/FLAG\{[a-f0-9]+\}/);
+  if (!flagMatch) throw new Error('Could not get flag for CH1: ' + JSON.stringify(ch1Res.data));
+  const flag = flagMatch[0];
   
-  // Login to get token for progress (if progress requires auth? CTF progress is public or requires soc?)
-  // Actually, /api/ctf/submit and /api/ctf/progress might be public in SOC.
   res = await request('POST', '/api/ctf/submit', { flag });
   assert.strictEqual(res.status, 200, 'Submit flag should be 200');
+  assert.strictEqual(res.data.correct, true, 'Flag should be correct');
   
   res = await request('GET', '/api/ctf/progress');
   assert.strictEqual(res.status, 200);
   assert(res.data.progress.some(p => p.challenge_key === 'cart_manipulation'), 'Progress should list the solved flag');
 
-  // We need to wait for reset rate limit (10s) or bypass it by deleting from db for test?
-  // Let's bypass the rate limiter in memory by deleting the entry? No, it's express-rate-limit. We just wait 10s or rely on DB checks.
-  // We can just manually clean the solved_flags table for the rest of the test.
-  db.exec('DELETE FROM solved_flags');
+  console.log('Waiting 10s for reset rate limit to expire...');
+  await new Promise(r => setTimeout(r, 10000));
+  const resetRes3 = await request('POST', '/api/sys/reset', null, { 'X-Bugdrop-Client': 'soc' });
+  if (resetRes3.status !== 200) throw new Error('Reset 3 failed: ' + resetRes3.status);
+  
   res = await request('GET', '/api/ctf/progress');
   assert(!res.data.progress.some(p => p.challenge_key === 'cart_manipulation'), 'Progress should be empty after reset');
   
@@ -72,10 +74,16 @@ async function run() {
   assert.strictEqual(res.status, 423, 'Pista 2 immediately should be 423');
   assert(res.data.retry_after > 0, 'Should return retry_after');
 
-  // 9. Retrasar first_viewed_at 130s en BD -> 200
-  db.exec(`UPDATE hint_views SET first_viewed_at = datetime('now', '-130 seconds') WHERE challenge_key = 'cart_manipulation'`);
+  // 9. Retrasar first_viewed_at o esperar HINT_LEVEL2_DELAY_SECONDS
+  const delaySec = parseInt(process.env.HINT_LEVEL2_DELAY_SECONDS || '120', 10);
+  if (delaySec > 10) {
+    throw new Error('HINT_LEVEL2_DELAY_SECONDS must be <= 10 for automated tests. Found: ' + delaySec);
+  }
+  console.log(`Waiting ${delaySec + 1}s for hint level 2 delay...`);
+  await new Promise(r => setTimeout(r, (delaySec + 1) * 1000));
+
   res = await request('GET', '/api/ctf/hint/cart_manipulation/2');
-  assert.strictEqual(res.status, 200, 'Pista 2 after 130s should be 200');
+  assert.strictEqual(res.status, 200, 'Pista 2 after delay should be 200');
 
   // 10. 31 pistas en 1 min -> 429
   // Just query Pista 1 30 times

@@ -60,12 +60,17 @@ async function run() {
   await new Promise((resolve, reject) => {
     let done = false;
     let collectorHit = false;
+    let receivedLogs = [];
     
     const timeout = setTimeout(() => {
-      if (!done) reject(new Error('Timeout waiting for Exfiltration alert'));
+      if (!done) {
+        console.error('All received http-logs:', JSON.stringify(receivedLogs, null, 2));
+        reject(new Error('Timeout waiting for Exfiltration alert'));
+      }
     }, 20000);
     
     socketBot.on('http-log', (log) => {
+      receivedLogs.push({ url: log.url, threats: log.threats });
       if (log.threats && log.threats.some(t => t.tag === 'Exfiltration')) {
         collectorHit = true;
       }

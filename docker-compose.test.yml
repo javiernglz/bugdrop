@@ -1,0 +1,4 @@
+services:
+  backend:
+    environment:
+      - HINT_LEVEL2_DELAY_SECONDS=3

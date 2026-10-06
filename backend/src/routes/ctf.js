@@ -69,8 +69,8 @@ router.get('/api/ctf/hint/:challengeKey/:level', rateLimit({ windowMs: 60000, ma
       return res.status(423).json({ error: 'You must unlock level 1 first.', retry_after: 0 });
     }
     const elapsed = (Date.now() - new Date(level1.first_viewed_at + "Z").getTime()) / 1000;
-    if (elapsed < 120) {
-      return res.status(423).json({ error: 'Please try the conceptual hint first.', retry_after: Math.ceil(120 - elapsed) });
+    if (elapsed < parseInt(process.env.HINT_LEVEL2_DELAY_SECONDS || '120', 10)) {
+      return res.status(423).json({ error: 'Please try the conceptual hint first.', retry_after: Math.ceil(parseInt(process.env.HINT_LEVEL2_DELAY_SECONDS || '120', 10) - elapsed) });
     }
   }
 
