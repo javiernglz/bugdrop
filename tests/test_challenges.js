@@ -38,6 +38,8 @@ function request(method, path, body = null, token = null, customHeaders = {}) {
 }
 
 async function runTests() {
+  let socket = { disconnect: () => {} };
+  const io = require('socket.io-client');
   console.log('--- BUGDROP CHALLENGE AUTOMATED TESTS ---');
   let flags = {};
   
@@ -120,8 +122,7 @@ async function runTests() {
 
     // Wait up to 20s for the SOC alert
     let exfilFlag = null;
-    const io = require('socket.io-client');
-    const socket = io('http://localhost:3000');
+    socket = io('http://localhost:3000');
     
     await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -532,7 +533,8 @@ async function runTests() {
   }
 
   console.log(`\nResults: ${passed} / 7 Challenges working end-to-end.`);
-  if (passed !== 7) process.exit(1);
+  socket.disconnect();
+  process.exit(passed === 7 ? 0 : 1);
 }
 
 runTests().catch(console.error);

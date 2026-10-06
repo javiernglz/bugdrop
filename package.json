@@ -11,6 +11,7 @@
     "seed": "cd backend && npm run seed",
     "install:all": "npm install && cd backend && npm install && cd ../frontend-shop && npm install && cd ../frontend-soc && npm install",
     "test": "node tests/test_challenges.js",
+    "test:step7": "node tests/test_step7.js",
     "test:bot": "node tests/test_bot.js"
   },
   "devDependencies": {
