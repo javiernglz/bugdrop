@@ -99,27 +99,51 @@ async function run() {
   if (listenerHit) throw new Error('External fetch was not aborted! Listener hit.');
   console.log('✅ Whitelist works: external fetch aborted, collector fetch succeeded.');
 
+  
   // 3. 8 reviews in a burst
   console.log('Sending 8 burst reviews...');
+  let maxRunning = 0;
+  let maxQueued = 0;
+  let maxDropped = 0;
+  
+  const pollInterval = setInterval(async () => {
+    try {
+      const st = await request('GET', '/api/sys/status');
+      if (st.data?.bot) {
+        maxRunning = Math.max(maxRunning, st.data.bot.running);
+        maxQueued = Math.max(maxQueued, st.data.bot.queued);
+        maxDropped = Math.max(maxDropped, st.data.bot.dropped);
+      }
+    } catch(e) {}
+  }, 100);
+
+  const burstPromises = [];
   for(let i=0; i<8; i++) {
-    request('POST', '/api/products/1/reviews', {
+    burstPromises.push(request('POST', '/api/products/1/reviews', {
       content: `<img src=x onerror='console.log(${i})'>`,
       rating: 5
-    }, userToken).catch(() => {});
+    }, userToken));
   }
   
-  await new Promise(r => setTimeout(r, 500)); // wait for queue to process a bit
+  await Promise.allSettled(burstPromises);
+  await new Promise(r => setTimeout(r, 1000)); // wait a bit for queue to settle and dropped to register
+  clearInterval(pollInterval);
   
-  const statusRes2 = await request('GET', '/api/sys/status');
-  const b = statusRes2.data.bot;
-  console.log(`Bot status after burst: running=${b.running}, queued=${b.queued}, dropped=${b.dropped}`);
+  // Update dropped one last time just in case it dropped after the last interval
+  const finalSt = await request('GET', '/api/sys/status');
+  if (finalSt.data?.bot) {
+    maxDropped = Math.max(maxDropped, finalSt.data.bot.dropped);
+  }
+
+  console.log(`Bot stats during burst: maxRunning=${maxRunning}, maxQueued=${maxQueued}, finalDropped=${maxDropped}`);
   
-  if (b.running > 1) throw new Error(`Too many running: ${b.running}`);
-  if (b.queued > 3) throw new Error(`Too many queued: ${b.queued}`);
-  if (b.dropped < 1) throw new Error(`No visits dropped (should be >= 1): dropped=${b.dropped}`);
+  if (maxRunning > 1) throw new Error(`Too many running simultaneously: ${maxRunning}`);
+  if (maxQueued > 3) throw new Error(`Too many queued simultaneously: ${maxQueued}`);
+  if (maxDropped < 1) throw new Error(`No visits dropped (should be >= 1): finalDropped=${maxDropped}`);
   
   console.log('✅ Queue concurrency and limits respected.');
   console.log('--- ALL BOT TESTS COMPLETED ---');
+
 }
 
 run().then(() => {

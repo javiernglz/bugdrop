@@ -37,10 +37,20 @@ function request(method, path, body = null, token = null, customHeaders = {}) {
   });
 }
 
+
+const _io = require('socket.io-client');
+const _sockets = [];
+function io(url) {
+  const s = _io(url);
+  _sockets.push(s);
+  return s;
+}
+
 async function runTests() {
+  let passed = 0;
+  try {
   let socket = { disconnect: () => {} };
-  const io = require('socket.io-client');
-  console.log('--- BUGDROP CHALLENGE AUTOMATED TESTS ---');
+    console.log('--- BUGDROP CHALLENGE AUTOMATED TESTS ---');
   let flags = {};
   
   console.log('\nResetting database for clean state...');
@@ -273,8 +283,7 @@ async function runTests() {
     
     // Check if token is still valid
     
-    const io3 = require('socket.io-client');
-    const socket3 = io3('http://localhost:3000');
+        const socket3 = io('http://localhost:3000');
     let falseAlarm = false;
     let positiveAlarm = false; let meResStatus = 0;
     
@@ -317,8 +326,7 @@ async function runTests() {
   }
 
     console.log('\n--- VALIDATING IDOR ALERTS ---');
-    const io4 = require('socket.io-client');
-    const socket4 = io4('http://localhost:3000');
+        const socket4 = io('http://localhost:3000');
     let idorFired = false;
     socket4.on('http-log', (log) => {
       if (log.threats && log.threats.some(t => t.tag === 'IDOR')) idorFired = true;
@@ -334,7 +342,7 @@ async function runTests() {
     
     // Test orders/:id own owner -> NO IDOR alert
     let idorFired2 = false;
-    const socket5 = require('socket.io-client')('http://localhost:3000');
+    const socket5 = io('http://localhost:3000');
     
     await new Promise(resolve => {
       socket5.on('http-log', (log) => {
@@ -373,8 +381,7 @@ async function runTests() {
     }, '123456');
     
     // Use a quick socket connection to wait for the alert
-    const io2 = require('socket.io-client');
-    const socket2 = io2('http://localhost:3000');
+        const socket2 = io('http://localhost:3000');
     let alertFired = false;
     
     await new Promise((resolve) => {
@@ -410,7 +417,7 @@ async function runTests() {
     }, '123456');
 
     let alertFiredNoJti = false;
-    const socket3 = require('socket.io-client')('http://localhost:3000');
+    const socket3 = io('http://localhost:3000');
     await new Promise((resolve) => {
       socket3.on('http-log', (log) => {
         if (log.threats && log.threats.some(t => t.tag === 'Forged JWT')) {
@@ -434,9 +441,12 @@ async function runTests() {
   }
 
 
+    
     // Extract token via XSS simulation like a real student
+    
+
     let stolenBotToken = null;
-    const socketBot = require('socket.io-client')('http://localhost:3000');
+    const socketBot = io('http://localhost:3000');
     
     await new Promise((resolve, reject) => {
       let done = false;
@@ -468,6 +478,8 @@ async function runTests() {
       if (log.threats && log.threats.some(t => t.tag === 'Forged JWT')) botFalseAlarm = true;
     });
     const dashRes = await request('GET', '/api/admin/dashboard', null, stolenBotToken);
+    
+
     await new Promise(r => setTimeout(r, 500));
     socketBot.disconnect();
     
@@ -520,7 +532,7 @@ async function runTests() {
   console.log('✅ maxSeverity computes correctly');
 
   console.log('\n--- VALIDATING FLAGS ---');
-  let passed = 0;
+  passed = 0;
   for (const [key, flag] of Object.entries(flags)) {
     
     const val = await request('POST', '/api/ctf/submit', { flag });
@@ -533,8 +545,13 @@ async function runTests() {
   }
 
   console.log(`\nResults: ${passed} / 7 Challenges working end-to-end.`);
-  socket.disconnect();
-  process.exit(passed === 7 ? 0 : 1);
+  
+  } catch (err) { 
+    console.error("❌ Test crashed:", err.stack);
+  } finally {
+    _sockets.forEach(s => { try { s.disconnect(); } catch(e){} });
+    process.exit(passed === 7 ? 0 : 1);
+  }
 }
 
 runTests().catch(console.error);

@@ -60,7 +60,8 @@ function visitPage(url, db) {
   if (!isAvailable) return Promise.resolve();
 
   botQueue.add(async () => {
-    let browser;
+let browser;
+    let globalTimeoutId;
     
     const taskLogic = async () => {
       const adminUser = { id: 1, username: 'bugdrop_admin', display_name: 'Admin', role: 'admin' };
@@ -106,13 +107,18 @@ function visitPage(url, db) {
     };
 
     const timeoutLogic = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Global Timeout Exceeded')), 10000);
+      globalTimeoutId = setTimeout(() => reject(new Error('Global Timeout Exceeded')), 10000);
     });
 
     try {
       await Promise.race([taskLogic(), timeoutLogic]);
+    } catch(err) {
+      console.error('Bot Task Error:', err.message);
     } finally {
-      if (browser) await browser.close();
+      if (globalTimeoutId) clearTimeout(globalTimeoutId);
+      if (browser) {
+        try { await browser.close(); } catch(e) { console.error('Error forcing browser close', e); }
+      }
     }
   });
 
