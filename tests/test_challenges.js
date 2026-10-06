@@ -200,6 +200,7 @@ async function runTests() {
       accounts.push({ username: m[1], password: m[2] });
     }
     
+    if (accounts.length < 4) throw new Error('Not enough accounts parsed');
     for (const acc of accounts) {
       const res = await request('POST', '/api/auth/login', acc);
       if (res.status !== 200) {
