@@ -52,19 +52,19 @@ function runSeed(dbInstance = null) {
     `);
 
     const products = [
-  ['Bug Hacker', 'Dark hoodie, glowing green eyes, and a laptop covered in stickers. Series 01 · Ultra Rare.', 99, 'series-01', '🐛', 10, 1],
-  ['Bug Aviator', 'Vintage leather jacket and pilot goggles. Always looking at the sky. Series 01 · Rare.', 49, 'series-01', '🐛', 60, 0],
-  ['Bug Robot', 'Titanium chassis, precise calculations, zero emotions. Series 01 · Rare.', 49, 'series-01', '🐛', 30, 0],
-  ['Bug Firefighter', 'Bright yellow coat and a tiny red helmet. Saves the day, every day. Series 01 · Common.', 29, 'series-01', '🐛', 150, 0],
-  ['Bug Astronaut', 'Pressurized suit with a tiny golden visor. Ready for the moon. Series 01 · Rare.', 49, 'series-01', '🐛', 25, 1],
-  ['Bug Chef', 'An 8-inch knife, leather apron, and a recipe nobody else knows. Series 01 · Common.', 29, 'series-01', '🐛', 100, 0],
-  ['Bug Detective', 'Sees everything. Knows everything. Never tells you how. Polished magnifying glass included. Series 01 · Rare.', 49, 'series-01', '🐛', 55, 0],
-  ['Bug Scientist', 'White lab coat, safety goggles, and three failed experiments a day. Very promising. Series 01 · Common.', 29, 'series-01', '🐛', 115, 0],
-  ['Bug Cowboy', 'Wide-brimmed hat, silver spurs, and a stare that needs no words. Series 01 · Common.', 29, 'series-01', '🐛', 120, 0],
-  ['Bug Samurai', 'Black lacquered armor, twin-blade katana, and a discipline the other Bugs cannot comprehend. Series 01 · Rare.', 49, 'series-01', '🐛', 45, 0],
-  ['Bug Wizard', 'Starry cape, crystal wand, and a hat from which things emerge that are better left unquestioned. Series 01 · Rare.', 49, 'series-01', '🐛', 50, 0],
-  ['Bug ???', '???', 999, 'secret', '🐛', 1, 1],
-];
+      ['Bug Hacker', 'Dark hoodie, glowing green eyes, and a laptop covered in stickers. Series 01 · Ultra Rare.', 99, 'series-01', '🐛', 10, 1],
+      ['Bug Aviator', 'Vintage leather jacket and pilot goggles. Always looking at the sky. Series 01 · Rare.', 49, 'series-01', '🐛', 60, 0],
+      ['Bug Robot', 'Titanium chassis, precise calculations, zero emotions. Series 01 · Rare.', 49, 'series-01', '🐛', 30, 0],
+      ['Bug Firefighter', 'Bright yellow coat and a tiny red helmet. Saves the day, every day. Series 01 · Common.', 29, 'series-01', '🐛', 150, 0],
+      ['Bug Astronaut', 'Pressurized suit with a tiny golden visor. Ready for the moon. Series 01 · Rare.', 49, 'series-01', '🐛', 25, 1],
+      ['Bug Chef', 'An 8-inch knife, leather apron, and a recipe nobody else knows. Series 01 · Common.', 29, 'series-01', '🐛', 100, 0],
+      ['Bug Detective', 'Sees everything. Knows everything. Never tells you how. Polished magnifying glass included. Series 01 · Rare.', 49, 'series-01', '🐛', 55, 0],
+      ['Bug Scientist', 'White lab coat, safety goggles, and three failed experiments a day. Very promising. Series 01 · Common.', 29, 'series-01', '🐛', 115, 0],
+      ['Bug Cowboy', 'Wide-brimmed hat, silver spurs, and a stare that needs no words. Series 01 · Common.', 29, 'series-01', '🐛', 120, 0],
+      ['Bug Samurai', 'Black lacquered armor, twin-blade katana, and a discipline the other Bugs cannot comprehend. Series 01 · Rare.', 49, 'series-01', '🐛', 45, 0],
+      ['Bug Wizard', 'Starry cape, crystal wand, and a hat from which things emerge that are better left unquestioned. Series 01 · Rare.', 49, 'series-01', '🐛', 50, 0],
+      ['Bug ???', '???', 999, 'secret', '🐛', 1, 1],
+    ];
 
     for (const p of products) {
       insertProduct.run(...p);
@@ -80,17 +80,28 @@ function runSeed(dbInstance = null) {
       VALUES (?, ?, ?, ?)
     `);
 
+    
+    const getId = (nameLike) => db.prepare("SELECT id FROM products WHERE name LIKE ?").get(`%${nameLike}%`).id;
+    const pSecret = db.prepare("SELECT id FROM products WHERE category = 'secret'").get().id;
+    const pSamurai = getId('Samurai');
+    const pAstronaut = getId('Astronaut');
+    const pScientist = getId('Scientist');
+    const pHacker = getId('Hacker');
+    const pAviator = getId('Aviator');
+    const pChef = getId('Chef');
+    const pWizard = getId('Wizard');
+
     const order1 = insertOrder.run(1, 'completed', 'paid', 752500000, '🚨 INTERNAL ONLY 🚨 Production molds for Bug ???. Factory coordinates: 47.1234°N, 172.5678°W. Access Code: ' + generateFlag('idor_orders') + '. DO NOT SHARE OUTSIDE DESIGN TEAM.');
-    insertOrderItem.run(order1.lastInsertRowid, 11, 1, 999);
+    insertOrderItem.run(order1.lastInsertRowid, pSecret, 1, 999);
 
     const order2 = insertOrder.run(2, 'shipped', 'paid', 58, 'Hoping to get the Samurai one.');
-    insertOrderItem.run(order2.lastInsertRowid, 3, 2, 29);
+    insertOrderItem.run(order2.lastInsertRowid, pSamurai, 2, 29);
 
     const order3 = insertOrder.run(3, 'pending', 'paid', 49, 'Please pack with extra bubble wrap, keeping it sealed in box.');
-    insertOrderItem.run(order3.lastInsertRowid, 5, 1, 49);
+    insertOrderItem.run(order3.lastInsertRowid, pAstronaut, 1, 49);
 
     const order4 = insertOrder.run(4, 'pending', 'pending', 12340000, 'Note: I am buying out the whole stock.');
-    insertOrderItem.run(order4.lastInsertRowid, 8, 100, 29);
+    insertOrderItem.run(order4.lastInsertRowid, pScientist, 100, 29);
 
     const insertReview = db.prepare(`
       INSERT INTO reviews (user_id, product_id, content, rating)
@@ -98,11 +109,11 @@ function runSeed(dbInstance = null) {
     `);
 
     const reviews = [
-      [2, 1, 'The paint job on the hoodie is amazing. Fits perfectly with my desk setup. 5/5', 5],
-      [3, 2, 'The box was slightly dented when it arrived. The figure is cool though.', 3],
-      [4, 5, 'Bought 10 boxes trying to get the Secret. Got 4 Astronauts instead. Nice detail.', 4],
-      [2, 6, 'Love the little chef hat! The clay texture is incredible.', 5],
-      [5, 10, 'The Samurai sword arrived bent. I had to heat it up to fix it.', 2],
+      [2, pHacker, 'The paint job on the hoodie is amazing. Fits perfectly with my desk setup. 5/5', 5],
+      [3, pAviator, 'The box was slightly dented when it arrived. The figure is cool though.', 3],
+      [4, pAstronaut, 'Bought 10 boxes trying to get the Secret. Got 4 Astronauts instead. Nice detail.', 4],
+      [2, pChef, 'Love the little chef hat! The clay texture is incredible.', 5],
+      [5, pSamurai, 'The Samurai sword arrived bent. I had to heat it up to fix it.', 2],
     ];
 
     for (const r of reviews) {

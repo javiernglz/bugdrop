@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 
 const COLLECTOR_ACCOUNTS = [
   { username: 'collector_42', password: 'bugdrop2024', hint: 'Collector #42 — Verified Buyer' },
-  { username: 'lady_caos', password: 'chaos666', hint: 'Lady Caos — Early Adopter' },
-  { username: 'prof_doom', password: 'doom1234', hint: 'Prof. Doom — Bulk Buyer' },
-  { username: 'hacker_fantasma', password: 'ghost_in_shell', hint: 'The Ghost — Anonymous Collector' },
+  { username: 'lady_caos', password: 'caos123', hint: 'Lady Caos — Rarest drops only' },
+  { username: 'prof_doom', password: 'doom_rules', hint: 'Prof. Doom — Material Analyst' },
+  { username: 'cyber_ninja', password: 'ghost_in_shell', hint: 'The Ghost — Elusive Collector' }
 ];
 
 export default function Login() {

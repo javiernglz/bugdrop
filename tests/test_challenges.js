@@ -182,6 +182,46 @@ async function runTests() {
   // ==========================================
   // VALIDATE ALL FLAGS
   // ==========================================
+
+  // ==========================================
+  // ADDITIONAL CHECKS (Step 2)
+  // ==========================================
+  console.log('\n--- VALIDATING LOGIN ACCOUNTS & ORDER #1 ---');
+  try {
+    const loginJsx = require('fs').readFileSync('frontend-shop/src/pages/Login.jsx', 'utf8');
+    const match = loginJsx.match(/const COLLECTOR_ACCOUNTS = \[[\s\S]*?\];/);
+    if (!match) throw new Error('COLLECTOR_ACCOUNTS not found in Login.jsx');
+    
+    // Quick and dirty parser for the accounts array
+    const accounts = [];
+    const regex = /username:\s*'([^']+)',\s*password:\s*'([^']+)'/g;
+    let m;
+    while ((m = regex.exec(match[0])) !== null) {
+      accounts.push({ username: m[1], password: m[2] });
+    }
+    
+    for (const acc of accounts) {
+      const res = await request('POST', '/api/auth/login', acc);
+      if (res.status !== 200) {
+        console.error(`❌ Failed to login with ${acc.username}:${acc.password}`);
+        process.exit(1);
+      }
+      console.log(`✅ Login working for ${acc.username}`);
+    }
+
+    const order1 = await request('GET', '/api/orders/1', null, userToken); // using the same collector_42 token from setup
+    // wait, collector_42 can read order 1 because of IDOR!
+    const hasSecretBug = order1.data?.items?.some(i => i.product_name === 'Bug ???');
+    if (!hasSecretBug) {
+      console.error('❌ Order #1 does not contain Bug ???', order1.data);
+      process.exit(1);
+    }
+    console.log('✅ Order #1 contains Bug ???');
+  } catch (err) {
+    console.error('❌ Additional checks failed:', err.message);
+    process.exit(1);
+  }
+
   console.log('\n--- VALIDATING FLAGS ---');
   let passed = 0;
   for (const [key, flag] of Object.entries(flags)) {
