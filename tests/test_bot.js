@@ -102,6 +102,8 @@ async function run() {
   
   // 3. 8 reviews in a burst
   console.log('Sending 8 burst reviews...');
+  const initialSt = await request('GET', '/api/sys/status');
+  let initialDropped = initialSt.data?.bot?.dropped || 0;
   let maxRunning = 0;
   let maxQueued = 0;
   let maxDropped = 0;
@@ -135,11 +137,11 @@ async function run() {
     maxDropped = Math.max(maxDropped, finalSt.data.bot.dropped);
   }
 
-  console.log(`Bot stats during burst: maxRunning=${maxRunning}, maxQueued=${maxQueued}, finalDropped=${maxDropped}`);
+  console.log(`Bot stats during burst: maxRunning=${maxRunning}, maxQueued=${maxQueued}, initialDropped=${initialDropped}, finalDropped=${maxDropped}`);
   
   if (maxRunning > 1) throw new Error(`Too many running simultaneously: ${maxRunning}`);
   if (maxQueued > 3) throw new Error(`Too many queued simultaneously: ${maxQueued}`);
-  if (maxDropped < 1) throw new Error(`No visits dropped (should be >= 1): finalDropped=${maxDropped}`);
+  if (maxDropped - initialDropped < 4) throw new Error(`Not enough visits dropped (should be >= 4): dropped ${maxDropped - initialDropped}`);
   
   console.log('✅ Queue concurrency and limits respected.');
   console.log('--- ALL BOT TESTS COMPLETED ---');

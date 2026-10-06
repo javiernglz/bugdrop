@@ -13,3 +13,4 @@ commits.txt
 fix_*.py
 clean_*.py
 *_crop*.py
+evidence/
