@@ -1,35 +1,99 @@
-name: Bugdrop CI
+name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  frontends:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        frontend: [frontend-shop, frontend-soc]
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install dependencies
+        working-directory: ${{ matrix.frontend }}
+        run: npm ci
+      - name: Lint
+        working-directory: ${{ matrix.frontend }}
+        run: npx oxlint
+      - name: Build
+        working-directory: ${{ matrix.frontend }}
+        run: npm run build
 
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        cache: 'npm'
+  e2e-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install all dependencies
+        run: npm run install:all
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run backend audit
+        working-directory: backend
+        run: npm audit --omit=dev --audit-level=high
+      - name: Start local servers
+        env:
+          HINT_LEVEL2_DELAY_SECONDS: 3
+        run: |
+          npm run dev:backend &
+          cd frontend-shop && npm run dev &
+      - name: Wait for servers
+        run: npx wait-on --timeout 60000 http://localhost:3000/api/health http://localhost:5173
+      - name: Run tests
+        run: |
+          npm test
+          sleep 11
+          npm run test:bot
+          sleep 11
+          HINT_LEVEL2_DELAY_SECONDS=3 npm run test:step7
 
-    - name: Install dependencies
-      run: npm run install:all
-
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
-
-    - name: Start Servers
-      run: npm run dev &
-      
-    - name: Wait for backend
-      run: npx wait-on --timeout 60000 http://localhost:3000/api/sys/status
-
-    - name: Run E2E Tests
-      run: npm test
+  docker-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install all dependencies
+        run: npm run install:all
+      - name: Start Docker Stack
+        run: docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build --wait
+      - name: Run tests
+        run: |
+          npm test
+          sleep 11
+          npm run test:bot
+          sleep 11
+          HINT_LEVEL2_DELAY_SECONDS=3 npm run test:step7
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+      - name: Teardown Docker Stack
+        if: always()
+        run: docker compose down -v
