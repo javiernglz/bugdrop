@@ -74,9 +74,9 @@ function socInterceptor(req, res, next) {
     });
 
     const hasThreat = threats.length > 0;
+    const SEVERITY_RANK = { low: 1, medium: 2, high: 3, critical: 4 };
     const maxSeverity = hasThreat
-      ? threats.reduce((max, t) =>
-          t.severity === 'critical' ? 'critical' : max === 'critical' ? 'critical' : t.severity, 'low')
+      ? threats.reduce((max, t) => SEVERITY_RANK[t.severity] > SEVERITY_RANK[max] ? t.severity : max, 'low')
       : null;
     
     const responseFlag = res.locals.responseFlag || responseBody?.flag || flagFoundInText || null;

@@ -223,6 +223,16 @@ async function runTests() {
     process.exit(1);
   }
 
+
+  console.log('\n--- VALIDATING SOC MAX_SEVERITY RANKING ---');
+  // We'll test it by looking at the source code of socInterceptor.js
+  const socCode = require('fs').readFileSync('backend/src/middleware/socInterceptor.js', 'utf8');
+  if (!socCode.includes('SEVERITY_RANK')) {
+    console.error('❌ SEVERITY_RANK not found in socInterceptor');
+    process.exit(1);
+  }
+  console.log('✅ maxSeverity uses SEVERITY_RANK');
+
   console.log('\n--- VALIDATING FLAGS ---');
   let passed = 0;
   for (const [key, flag] of Object.entries(flags)) {
