@@ -11,4 +11,4 @@ The backend executes a Chromium browser to visit user-submitted content (hostile
 
 ### State and Persistence
 - Data (like `bugdrop.db`) and the flag secret (`.ctf_secret`) live in the `/data` volume.
-- The `/api/sys/reset` endpoint is protected by a CSRF token (`ALLOW_RESET` header) and rate-limiting. This is **NOT authentication**; it only exists to prevent accidental clicks or CSRF attacks from resetting the state of other users.
+- The `/api/sys/reset` endpoint expects the custom header `X-Bugdrop-Client: soc` (which forces a CORS preflight) and has a 10s cooldown. Setting the environment variable `ALLOW_RESET=false` disables the endpoint entirely. This is **NOT authentication**; it only exists to prevent accidental clicks or CSRF attacks from resetting the state of the single-player lab.
