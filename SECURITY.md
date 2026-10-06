@@ -1,16 +1,14 @@
-# Security Policy
+# Security Considerations
 
-## Intentional Vulnerabilities
-Bugdrop is a deliberately vulnerable web application designed for educational purposes, Capture The Flag (CTF) challenges, and Bug Bounty training. 
+This is an intentionally vulnerable application designed for educational purposes. It contains critical security flaws like XSS, CSRF, IDOR, SQL Injection, and Broken Access Control by design.
 
-**DO NOT REPORT VULNERABILITIES FOUND IN THIS APPLICATION.**
+**Do not expose this application outside of `127.0.0.1`.**
 
-The application contains intentional security flaws (including but not limited to XSS, SQL Injection, IDOR, Business Logic flaws, and Information Disclosure). These are documented features of the training environment.
+### Bot Sandbox and Hostile HTML
+The backend executes a Chromium browser to visit user-submitted content (hostile HTML) to simulate an admin for the XSS challenge. 
+- While the bot only visits URLs on a strict whitelist (e.g., `http://shop:8080` or `http://localhost:5173`), it renders whatever payload is there.
+- `--no-sandbox` is passed to the browser as a conscious decision to run inside Docker without privileged mode. Rely on the Docker container isolation.
 
-## Deployment Warning
-Because this application is extremely vulnerable by design, **NEVER** expose it to the public internet or an untrusted network. It should only be run locally bound to `127.0.0.1` (as configured by default in the `docker-compose.yml`) or inside an isolated virtual machine.
-
-## Reporting Actual Security Issues
-If you find a security issue in the *infrastructure* of the project (e.g., the Docker configuration, or a supply chain vulnerability in a dependency that could compromise the host machine running the container), please open an issue in the GitHub repository.
-
-We welcome PRs that harden the Docker container or improve the isolation of the environment without breaking the CTF challenges.
+### State and Persistence
+- Data (like `bugdrop.db`) and the flag secret (`.ctf_secret`) live in the `/data` volume.
+- The `/api/sys/reset` endpoint is protected by a CSRF token (`ALLOW_RESET` header) and rate-limiting. This is **NOT authentication**; it only exists to prevent accidental clicks or CSRF attacks from resetting the state of other users.
