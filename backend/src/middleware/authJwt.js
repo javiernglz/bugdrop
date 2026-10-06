@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../routes/auth');
+const { verifyToken } = require('../routes/auth');
 const { addThreat } = require('../utils/socAlert');
 
 function getUserFromToken(req) {
@@ -11,7 +11,7 @@ function getUserFromToken(req) {
 
   
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return verifyToken(token);
   } catch (err) {
     if (err.name === 'JsonWebTokenError' && err.message === 'invalid signature') {
       addThreat(req, { tag: 'Forged JWT', severity: 'critical', match: 'Invalid signature detected' });

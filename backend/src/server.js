@@ -14,7 +14,7 @@ const paymentRoutes = require('./routes/payment');
 const ctfRoutes = require('./routes/ctf');
 const systemRoutes = require('./routes/system');
 const adminRoutes = require('./routes/admin');
-const socInterceptor = require('./middleware/socInterceptor');
+const { socInterceptor } = require('./middleware/socInterceptor');
 
 const app = express();
 const server = http.createServer(app);

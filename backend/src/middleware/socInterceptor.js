@@ -74,10 +74,7 @@ function socInterceptor(req, res, next) {
     });
 
     const hasThreat = threats.length > 0;
-    const SEVERITY_RANK = { low: 1, medium: 2, high: 3, critical: 4 };
-    const maxSeverity = hasThreat
-      ? threats.reduce((max, t) => SEVERITY_RANK[t.severity] > SEVERITY_RANK[max] ? t.severity : max, 'low')
-      : null;
+    const maxSeverity = hasThreat ? computeMaxSeverity(threats) : null;
     
     const responseFlag = res.locals.responseFlag || responseBody?.flag || flagFoundInText || null;
 
@@ -104,4 +101,10 @@ function socInterceptor(req, res, next) {
   next();
 }
 
-module.exports = socInterceptor;
+
+function computeMaxSeverity(threats) {
+  const SEVERITY_RANK = { low: 1, medium: 2, high: 3, critical: 4 };
+  return threats.reduce((max, t) => SEVERITY_RANK[t.severity] > SEVERITY_RANK[max] ? t.severity : max, 'low');
+}
+
+module.exports = { socInterceptor, computeMaxSeverity };

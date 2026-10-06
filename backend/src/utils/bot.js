@@ -1,5 +1,4 @@
 const { JWT_SECRET, signToken } = require('../routes/auth');
-const jwt = require('jsonwebtoken');
 
 async function visitPage(url, db) {
   let browser;

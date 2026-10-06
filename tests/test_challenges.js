@@ -105,6 +105,18 @@ async function runTests() {
       rating: 5
     }, userToken);
 
+    // Check if frontend is running before waiting
+    try {
+      const http = require('http');
+      await new Promise((resolve, reject) => {
+        const req = http.get('http://localhost:5173', (res) => { res.on('data', ()=>{}); resolve(); });
+        req.on('error', reject);
+      });
+    } catch(err) {
+      console.error('❌ Shop frontend (localhost:5173) no está levantado. El bot no podrá visitarlo.');
+      process.exit(1);
+    }
+
     // Wait up to 20s for the SOC alert
     let exfilFlag = null;
     const io = require('socket.io-client');
@@ -118,7 +130,7 @@ async function runTests() {
 
       socket.on('http-log', (log) => {
         if (log.threats && log.threats.some(t => t.tag === 'Exfiltration') && log.responseFlag) {
-          clearTimeout(timeout);
+          console.log('SOC EXFILTRATION LOG:', JSON.stringify(log)); clearTimeout(timeout);
           exfilFlag = log.responseFlag;
           socket.disconnect();
           resolve();
@@ -245,6 +257,25 @@ async function runTests() {
 
 
 
+
+  console.log('\n--- VALIDATING SESSION PERSISTENCE AFTER RESET ---');
+  try {
+    const loginRes = await request('POST', '/api/auth/login', { username: 'collector_42', password: 'bugdrop2024' });
+    if (!loginRes.data?.token) throw new Error('Could not login');
+    const token = loginRes.data.token;
+    
+    // Reset DB
+    await request('POST', '/api/sys/reset');
+    
+    // Check if token is still valid
+    const meRes = await request('GET', '/api/auth/me', null, token);
+    if (meRes.status !== 200) throw new Error('Token invalidated after reset (status ' + meRes.status + ')');
+    console.log('✅ Session persisted after reset');
+  } catch (err) {
+    console.error('❌ Session persistence failed:', err.message);
+    process.exit(1);
+  }
+
   console.log('\n--- VALIDATING COLLECTOR NEGATIVE TESTS ---');
   try {
     const neg1 = await request('GET', '/api/ctf/collector?c=admin');
@@ -255,6 +286,12 @@ async function runTests() {
     const neg2 = await request('GET', `/api/ctf/collector?c=session=${forged}`);
     if (neg2.data?.flag) throw new Error('Collector gave flag for forged JWT');
     
+    const loginRes2 = await request('POST', '/api/auth/login', { username: 'collector_42', password: 'bugdrop2024' });
+    const validLoginToken = loginRes2.data.token;
+    const neg3 = await request('GET', `/api/ctf/collector?c=session=${validLoginToken}`);
+    if (neg3.data?.flag) throw new Error('Collector gave flag for normal user token');
+    
+    
     console.log('✅ Collector negative tests passed');
   } catch (err) {
     console.error('❌ Negative tests failed:', err.message);
@@ -262,13 +299,13 @@ async function runTests() {
   }
 
   console.log('\n--- VALIDATING SOC MAX_SEVERITY RANKING ---');
-  // We'll test it by looking at the source code of socInterceptor.js
-  const socCode = require('fs').readFileSync('backend/src/middleware/socInterceptor.js', 'utf8');
-  if (!socCode.includes('SEVERITY_RANK')) {
-    console.error('❌ SEVERITY_RANK not found in socInterceptor');
+  const { computeMaxSeverity } = require('../backend/src/middleware/socInterceptor.js');
+  const testThreats = [{ severity: 'high' }, { severity: 'low' }];
+  if (computeMaxSeverity(testThreats) !== 'high') {
+    console.error('❌ computeMaxSeverity failed: expected high');
     process.exit(1);
   }
-  console.log('✅ maxSeverity uses SEVERITY_RANK');
+  console.log('✅ maxSeverity computes correctly');
 
   console.log('\n--- VALIDATING FLAGS ---');
   let passed = 0;

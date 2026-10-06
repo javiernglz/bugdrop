@@ -90,13 +90,13 @@ router.get('/api/ctf/collector', (req, res) => {
   const db = req.app.get('db');
   
   // We need JWT_SECRET, wait, JWT_SECRET is not imported in ctf.js! I must import it!
-  const { JWT_SECRET } = require('./auth');
+  const { verifyToken } = require('./auth');
 
   let payload = null;
   if (m) { 
     try { 
       const jwt = require('jsonwebtoken');
-      payload = jwt.verify(m[1], JWT_SECRET); 
+      payload = verifyToken(m[1]); 
     } catch (err) {} 
   }
   

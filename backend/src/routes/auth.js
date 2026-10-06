@@ -94,3 +94,8 @@ router.post('/api/auth/logout', (_req, res) => {
 module.exports = router;
 module.exports.JWT_SECRET = JWT_SECRET;
 module.exports.signToken = signToken;
+
+function verifyToken(token) {
+  return jwt.verify(token, JWT_SECRET);
+}
+module.exports.verifyToken = verifyToken;
