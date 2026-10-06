@@ -130,7 +130,7 @@ async function runTests() {
 
       socket.on('http-log', (log) => {
         if (log.threats && log.threats.some(t => t.tag === 'Exfiltration') && log.responseFlag) {
-          console.log('SOC EXFILTRATION LOG:', JSON.stringify(log)); clearTimeout(timeout);
+          clearTimeout(timeout);
           exfilFlag = log.responseFlag;
           socket.disconnect();
           resolve();
