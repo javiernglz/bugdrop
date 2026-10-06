@@ -15,6 +15,8 @@ function runSeed(dbInstance = null) {
     db.exec('DROP TABLE IF EXISTS products');
     db.exec('DROP TABLE IF EXISTS users');
     db.exec('DROP TABLE IF EXISTS flags');
+    db.exec('DROP TABLE IF EXISTS hint_views');
+    db.exec('DROP TABLE IF EXISTS solved_flags');
     db.exec('DROP TABLE IF EXISTS bugdrops');
 
     initTables(db);

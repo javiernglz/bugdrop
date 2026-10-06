@@ -84,6 +84,18 @@ function initTables(db) {
       hints_level1 TEXT,
       hints_level2 TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS hint_views (
+      challenge_key TEXT NOT NULL,
+      level INTEGER NOT NULL,
+      first_viewed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (challenge_key, level)
+    );
+
+    CREATE TABLE IF NOT EXISTS solved_flags (
+      challenge_key TEXT PRIMARY KEY,
+      solved_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 }
 

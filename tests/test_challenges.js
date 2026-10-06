@@ -5,7 +5,7 @@ const BASE_URL = process.env.API_URL || 'http://localhost:3000';
 const JWT_SECRET = '123456';
 
 // Helper for making requests
-function request(method, path, body = null, token = null) {
+function request(method, path, body = null, token = null, customHeaders = {}) {
   return new Promise((resolve, reject) => {
     const url = new URL(path, BASE_URL);
     const options = {
@@ -13,6 +13,7 @@ function request(method, path, body = null, token = null) {
       headers: { 'Content-Type': 'application/json' }
     };
     if (token) options.headers['Authorization'] = `Bearer ${token}`;
+    Object.assign(options.headers, customHeaders);
 
     const req = http.request(url, options, (res) => {
       let data = '';
@@ -41,7 +42,7 @@ async function runTests() {
   let flags = {};
   
   console.log('\nResetting database for clean state...');
-  const reset = await request('POST', '/api/sys/reset');
+  const reset = await request('POST', '/api/sys/reset', null, null, { 'X-Bugdrop-Client': 'soc' });
   if (!reset.data || !reset.data.success) {
     console.error('❌ Failed to reset database:', reset.data);
     process.exit(1);
@@ -265,7 +266,9 @@ async function runTests() {
     const token = loginRes.data.token;
     
     // Reset DB
-    await request('POST', '/api/sys/reset');
+    await new Promise(r => setTimeout(r, 10500));
+    const rst = await request('POST', '/api/sys/reset', null, null, { 'X-Bugdrop-Client': 'soc' });
+    if(rst.status !== 200) throw new Error('Reset failed with ' + rst.status);
     
     // Check if token is still valid
     

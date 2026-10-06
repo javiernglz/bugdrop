@@ -18,7 +18,7 @@ export default function PanicButton({ onResetCtf }) {
     setConfirming(false);
 
     try {
-      const res = await fetch('/api/sys/reset', { method: 'POST' });
+      const res = await fetch('/api/sys/reset', { method: 'POST', headers: { 'X-Bugdrop-Client': 'soc' } });
       const data = await res.json();
 
       if (data.success) {

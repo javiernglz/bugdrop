@@ -20,7 +20,17 @@ export default function useCtf() {
   useEffect(() => {
     fetch('/api/ctf/challenges')
       .then(r => r.json())
-      .then(data => setChallenges(data.challenges));
+      .then(data => setChallenges(data.challenges || []));
+      
+    fetch('/api/ctf/progress')
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.progress) {
+          const solvedKeys = data.progress.map(p => p.challenge_key);
+          setSolved(solvedKeys);
+          localStorage.setItem('bugdrop-solved', JSON.stringify(solvedKeys));
+        }
+      });
   }, []);
 
   useEffect(() => {
@@ -48,10 +58,14 @@ export default function useCtf() {
 
   const getHint = useCallback(async (challengeKey, level) => {
     const cacheKey = `${challengeKey}-${level}`;
-    if (hints[cacheKey]) return hints[cacheKey];
+    if (hints[cacheKey] && !hints[cacheKey].error) return hints[cacheKey];
 
     const res = await fetch(`/api/ctf/hint/${challengeKey}/${level}`);
     const data = await res.json();
+
+    if (!res.ok) {
+      data = { error: data.error || 'Too many requests.', retry_after: data.retry_after || 0, isError: true };
+    }
 
     setHints(prev => {
       const next = { ...prev, [cacheKey]: data };
@@ -75,6 +89,6 @@ export default function useCtf() {
     submitFlag,
     getHint,
     resetProgress,
-    progress: { current: solved.length, total: challenges.length || 4 },
+    progress: { current: solved.length, total: challenges.length },
   };
 }

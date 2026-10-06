@@ -29,6 +29,7 @@ const io = new Server(server, {
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Bugdrop-Client']
 }));
 app.use(express.json());
 app.use(cookieParser());

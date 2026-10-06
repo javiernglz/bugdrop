@@ -72,20 +72,20 @@ export default function ChallengePanel({ challenges, solved, hints, onGetHint, o
                     <motion.div 
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
-                      className="text-[13px] bg-yellow-50/50 dark:bg-yellow-500/10 p-4 rounded-xl border border-yellow-100 dark:border-yellow-500/20 text-yellow-800 dark:text-yellow-200 transition-colors"
+                      className="text-[13px] bg-yellow-50/50 dark:bg-yellow-500/10 p-4 rounded-xl border border-yellow-100 dark:border-yellow-500/20 text-yellow-800 dark:text-yellow-200 transition-colors" onClick={() => hint1.isError && onGetHint(c.challenge_key, 1)} style={{ cursor: hint1.isError ? 'pointer' : 'default' }}
                     >
                       <strong className="text-yellow-600 dark:text-yellow-500 uppercase tracking-widest text-[10px] block mb-1">Concept</strong>
-                      {hint1.hint}
+                      {hint1.isError ? (<span>{hint1.error} {hint1.retry_after > 0 && `(Retry in ${hint1.retry_after}s)`}</span>) : hint1.hint}
                     </motion.div>
                     
                     {hint2 ? (
                       <motion.div 
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
-                        className="text-[13px] bg-red-50/50 dark:bg-red-500/10 p-4 rounded-xl border border-red-100 dark:border-red-500/20 text-red-800 dark:text-red-200 transition-colors"
+                        className="text-[13px] bg-red-50/50 dark:bg-red-500/10 p-4 rounded-xl border border-red-100 dark:border-red-500/20 text-red-800 dark:text-red-200 transition-colors" onClick={() => hint2.isError && onGetHint(c.challenge_key, 2)} style={{ cursor: hint2.isError ? 'pointer' : 'default' }}
                       >
                         <strong className="text-red-600 dark:text-red-500 uppercase tracking-widest text-[10px] block mb-1">Technical</strong>
-                        {hint2.hint}
+                        {hint2.isError ? (<span>{hint2.error} {hint2.retry_after > 0 && `(Retry in ${hint2.retry_after}s)`}</span>) : hint2.hint}
                       </motion.div>
                     ) : (
                       <button

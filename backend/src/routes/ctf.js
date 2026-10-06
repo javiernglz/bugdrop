@@ -6,24 +6,25 @@ const router = Router();
 
 router.get('/api/ctf/challenges', (req, res) => {
   const db = req.app.get('db');
-
   const challenges = db.prepare(
     'SELECT challenge_key, title, description, difficulty FROM flags'
   ).all();
-
   res.json({ challenges });
 });
 
+router.get('/api/ctf/progress', (req, res) => {
+  const db = req.app.get('db');
+  const progress = db.prepare('SELECT challenge_key, solved_at FROM solved_flags').all();
+  res.json({ progress });
+});
 
 router.post('/api/ctf/submit', rateLimit({ windowMs: 60000, max: 15 }), (req, res) => {
-
   const db = req.app.get('db');
   const { flag } = req.body;
 
   if (!flag || !flag.trim()) {
     return res.status(400).json({ error: 'Submit a flag to verify your finding.' });
   }
-
   
   const challenges = db.prepare('SELECT * FROM flags').all();
   let match = null;
@@ -34,8 +35,8 @@ router.post('/api/ctf/submit', rateLimit({ windowMs: 60000, max: 15 }), (req, re
     }
   }
 
-
   if (match) {
+    db.prepare('INSERT OR IGNORE INTO solved_flags (challenge_key) VALUES (?)').run(match.challenge_key);
     return res.json({
       correct: true,
       challenge: match.title,
@@ -50,7 +51,7 @@ router.post('/api/ctf/submit', rateLimit({ windowMs: 60000, max: 15 }), (req, re
   });
 });
 
-router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
+router.get('/api/ctf/hint/:challengeKey/:level', rateLimit({ windowMs: 60000, max: 30 }), (req, res) => {
   const db = req.app.get('db');
   const { challengeKey, level } = req.params;
 
@@ -61,6 +62,19 @@ router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
   }
 
   const hintLevel = parseInt(level, 10);
+
+  if (hintLevel === 2) {
+    const level1 = db.prepare('SELECT first_viewed_at FROM hint_views WHERE challenge_key = ? AND level = 1').get(challengeKey);
+    if (!level1) {
+      return res.status(423).json({ error: 'You must unlock level 1 first.', retry_after: 0 });
+    }
+    const elapsed = (Date.now() - new Date(level1.first_viewed_at + "Z").getTime()) / 1000;
+    if (elapsed < 120) {
+      return res.status(423).json({ error: 'Please try the conceptual hint first.', retry_after: Math.ceil(120 - elapsed) });
+    }
+  }
+
+  db.prepare('INSERT OR IGNORE INTO hint_views (challenge_key, level) VALUES (?, ?)').run(challengeKey, hintLevel);
 
   if (hintLevel === 1) {
     return res.json({
@@ -83,13 +97,11 @@ router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
   res.status(400).json({ error: 'Invalid hint level. Use 1 (conceptual) or 2 (technical).' });
 });
 
-
 router.get('/api/ctf/collector', (req, res) => {
   const raw = String(req.query.c || '');
   const m = raw.match(/(?:^|;\s*)session=([^;\s]+)/);
   const db = req.app.get('db');
   
-  // We need JWT_SECRET, wait, JWT_SECRET is not imported in ctf.js! I must import it!
   const { verifyToken } = require('./auth');
 
   let payload = null;
@@ -111,4 +123,3 @@ router.get('/api/ctf/collector', (req, res) => {
 });
 
 module.exports = router;
-
