@@ -47,7 +47,7 @@ export default function useCtf() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ flag }),
     });
-    const data = await res.json();
+    let data = await res.json();
 
     if (data.correct && !solved.includes(data.challenge_key)) {
       setSolved(prev => [...prev, data.challenge_key]);
@@ -61,7 +61,7 @@ export default function useCtf() {
     if (hints[cacheKey] && !hints[cacheKey].error) return hints[cacheKey];
 
     const res = await fetch(`/api/ctf/hint/${challengeKey}/${level}`);
-    const data = await res.json();
+    let data = await res.json();
 
     if (!res.ok) {
       data = { error: data.error || 'Too many requests.', retry_after: data.retry_after || 0, isError: true };
