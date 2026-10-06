@@ -1,4 +1,5 @@
 const { generateFlag } = require('../utils/flags');
+const { rateLimit } = require('../utils/rateLimit');
 const { Router } = require('express');
 const router = Router();
 
@@ -13,17 +14,7 @@ router.get('/api/ctf/challenges', (req, res) => {
 });
 
 
-const submitTracker = new Map();
-
-router.post('/api/ctf/submit', (req, res) => {
-  const ip = req.ip || '127.0.0.1';
-  const now = Date.now();
-  const lastSubmit = submitTracker.get(ip) || 0;
-  
-  if (now - lastSubmit < 1000) {
-    return res.status(429).json({ error: 'Too many requests. Take a breath, hacker.', rateLimited: true });
-  }
-  submitTracker.set(ip, now);
+router.post('/api/ctf/submit', rateLimit({ windowMs: 60000, max: 15 }), (req, res) => {
 
   const db = req.app.get('db');
   const { flag } = req.body;

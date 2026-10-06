@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const jwt = require('jsonwebtoken');
+const { rateLimit } = require('../utils/rateLimit');
 const router = Router();
 
 // VULNERABILIDAD: Clave JWT extremadamente débil e intencional.
@@ -21,7 +22,7 @@ function signToken(user) {
   );
 }
 
-router.post('/api/auth/login', (req, res) => {
+router.post('/api/auth/login', rateLimit({ windowMs: 60000, max: 20, keyFn: r => r.ip + ':' + (r.body?.username || '') }), (req, res) => {
   const db = req.app.get('db');
   const { username, password } = req.body;
 

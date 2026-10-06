@@ -185,7 +185,7 @@ async function runTests() {
   console.log('\n--- VALIDATING FLAGS ---');
   let passed = 0;
   for (const [key, flag] of Object.entries(flags)) {
-    await new Promise(r => setTimeout(r, 1100));
+    
     const val = await request('POST', '/api/ctf/submit', { flag });
     if (val.data?.correct) {
       console.log(`✅ [${key}] Flag accepted by CTF engine`);
