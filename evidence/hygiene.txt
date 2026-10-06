@@ -1,0 +1,15 @@
+=== ls-files ===
+=== 10 biggest blobs ===
+blob b9500a0a73a3f4973f14394b7495d54edd91eac3 7438879 bugdrop.zip
+blob 8ec836cab16d952b776882da07aec5ea63ec13f0 1075058 frontend-shop/public/hero.jpg
+blob 79eaad6696da39b6cda6123fad90835baedd527a 1014210 frontend-shop/public/sub.jpg
+blob 40ee41efb5fdab13eab7bbeaff15c8b582f867fe 988178 frontend-shop/public/uniforms.jpg
+blob 7bce0e52763bc0be6912dc9d9c4ed09b121156d4 959804 frontend-shop/public/volcano.jpg
+blob 6dd5668a8ca000a13aec4ba1fc1b0e59e1b21c26 941323 frontend-shop/public/mind_control.jpg
+blob d1f14de404824a652ef84afef4b03c525b65df14 938308 frontend-shop/public/shark.jpg
+blob eee7030cb47c92c6e5fa479ec03116d2ec91a99f 936380 frontend-shop/public/monologue.jpg
+blob fdc5b74662e1a5431339b82b9c39ebf1b4e7b774 925388 frontend-shop/public/cat.jpg
+blob 7cd47cbc54e5b89c12d12f63ce126d6849eed3a5 911264 frontend-shop/public/trap.jpg
+=== Authors ===
+fjaviernglez@gmail.com
+javiernglz@users.noreply.github.com

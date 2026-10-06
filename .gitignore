@@ -14,3 +14,10 @@ fix_*.py
 clean_*.py
 *_crop*.py
 evidence/
+.ctf_secret
+data/
+*.db
+*.db-shm
+*.db-wal
+commits.txt
+evidence/
