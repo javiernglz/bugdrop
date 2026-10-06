@@ -61,7 +61,25 @@ function socInterceptor(req, res, next) {
     const rawHeaders = JSON.stringify(req.headers);
     const fullPayload = rawBody + rawUrl + rawHeaders;
 
-    const threats = detectThreats(fullPayload);
+        let threats = detectThreats(fullPayload);
+    const extra = res.locals.extraThreats || [];
+    threats = [...threats, ...extra];
+    
+    // deduplicate by tag
+    const seenTags = new Set();
+    threats = threats.filter(t => {
+      if (seenTags.has(t.tag)) return false;
+      seenTags.add(t.tag);
+      return true;
+    });
+
+    const hasThreat = threats.length > 0;
+    const maxSeverity = hasThreat
+      ? threats.reduce((max, t) =>
+          t.severity === 'critical' ? 'critical' : max === 'critical' ? 'critical' : t.severity, 'low')
+      : null;
+    
+    const responseFlag = res.locals.responseFlag || responseBody?.flag || flagFoundInText || null;
 
     const logEntry = {
       id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -75,13 +93,9 @@ function socInterceptor(req, res, next) {
       body: req.body && Object.keys(req.body).length > 0 ? req.body : null,
       duration,
       threats,
-      hasThreat: threats.length > 0,
-      maxSeverity: threats.length > 0
-        ? threats.reduce((max, t) =>
-            t.severity === 'critical' ? 'critical' : max === 'critical' ? 'critical' : t.severity, 'low')
-        : null,
-      responseFlag: responseBody?.flag || flagFoundInText || null,
-
+      hasThreat,
+      maxSeverity,
+      responseFlag,
     };
 
     io.emit('http-log', logEntry);

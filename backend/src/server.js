@@ -1,4 +1,5 @@
 const express = require('express');
+const { addThreat } = require('./utils/socAlert');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
@@ -92,6 +93,14 @@ app.get('/api/health', (_req, res) => {
 // Global error handler to prevent absolute path leakage in stack traces
 
 const fuzzingTracker = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, hits] of fuzzingTracker) {
+    const recent = hits.filter(t => now - t < 10000);
+    recent.length ? fuzzingTracker.set(ip, recent) : fuzzingTracker.delete(ip);
+  }
+}, 10000).unref();
+
 app.use((req, res, next) => {
   const ip = req.ip || '127.0.0.1';
   const now = Date.now();
@@ -101,24 +110,7 @@ app.use((req, res, next) => {
   fuzzingTracker.set(ip, recentHits);
 
   if (recentHits.length >= 5) {
-    if (io) {
-      io.emit('http-log', {
-        id: `log-${now}-fuzz`,
-        timestamp: new Date().toISOString(),
-        method: req.method,
-        url: req.originalUrl || req.url,
-        statusCode: 404,
-        ip,
-        userAgent: req.headers['user-agent'] || '',
-        contentType: '',
-        body: null,
-        duration: 1,
-        threats: [{ tag: 'Fuzzing / Enumeration', severity: 'high', match: 'Multiple 404s detected in a short time' }],
-        hasThreat: true,
-        maxSeverity: 'high',
-        responseFlag: null
-      });
-    }
+    addThreat(req, { tag: 'Fuzzing / Enumeration', severity: 'high', match: 'Multiple 404s detected in a short time' });
   }
   res.status(404).json({ error: 'Endpoint not found' });
 });

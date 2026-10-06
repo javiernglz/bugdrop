@@ -1,5 +1,6 @@
 const { generateFlag } = require('../utils/flags');
 const { rateLimit } = require('../utils/rateLimit');
+const { addThreat } = require('../utils/socAlert');
 const { Router } = require('express');
 const router = Router();
 
@@ -85,7 +86,6 @@ router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
 
 router.get('/api/ctf/collector', (req, res) => {
   const { c } = req.query;
-  const io = req.app.get('io');
   
   if (!c) return res.send('OK');
 
@@ -93,24 +93,8 @@ router.get('/api/ctf/collector', (req, res) => {
   // If the exfiltrated cookie contains the admin JWT or any admin hint
   if (c.includes('eyJ') || c.includes('admin')) {
     flag = generateFlag('stored_xss');
-    if (io) {
-      io.emit('http-log', {
-        id: `log-${Date.now()}-exfil`,
-        timestamp: new Date().toISOString(),
-        method: 'GET',
-        url: '/api/ctf/collector',
-        statusCode: 200,
-        ip: req.ip || '127.0.0.1',
-        userAgent: 'VictimBrowser/1.0',
-        contentType: '',
-        body: null,
-        duration: 1,
-        threats: [{ tag: 'Exfiltration', severity: 'critical', match: 'Cookie stolen' }],
-        hasThreat: true,
-        maxSeverity: 'critical',
-        responseFlag: flag
-      });
-    }
+    addThreat(req, { tag: 'Exfiltration', severity: 'critical', match: 'Cookie stolen' });
+    res.locals.responseFlag = flag;
   }
 
   res.json({ status: 'logged', received: c, flag: flag });

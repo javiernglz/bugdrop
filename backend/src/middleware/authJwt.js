@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../routes/auth');
+const { addThreat } = require('../utils/socAlert');
 
 function getUserFromToken(req) {
   // The Authorization header takes priority over the cookie, so a token set explicitly
@@ -13,25 +14,7 @@ function getUserFromToken(req) {
     return jwt.verify(token, JWT_SECRET);
   } catch (err) {
     if (err.name === 'JsonWebTokenError' && err.message === 'invalid signature') {
-      const io = req.app?.get('io');
-      if (io) {
-        io.emit('http-log', {
-          id: `log-${Date.now()}-jwt`,
-          timestamp: new Date().toISOString(),
-          method: req.method,
-          url: req.originalUrl || req.url,
-          statusCode: 401,
-          ip: req.ip || '127.0.0.1',
-          userAgent: req.headers['user-agent'] || '',
-          contentType: '',
-          body: null,
-          duration: 1,
-          threats: [{ tag: 'Forged JWT', severity: 'critical', match: 'Invalid signature detected' }],
-          hasThreat: true,
-          maxSeverity: 'critical',
-          responseFlag: null
-        });
-      }
+      addThreat(req, { tag: 'Forged JWT', severity: 'critical', match: 'Invalid signature detected' });
     }
     return null;
   }
