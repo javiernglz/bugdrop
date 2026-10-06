@@ -3,36 +3,70 @@ services:
     build: ./backend
     ports:
       - "127.0.0.1:3000:3000"
+    volumes:
+      - bugdrop-data:/data
     environment:
       - PORT=3000
       - HOST=0.0.0.0
+      - DATA_DIR=/data
+      - SHOP_HOST=shop:8080
+      - BOT_CHROMIUM_ARGS=--no-sandbox,--disable-dev-shm-usage
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://localhost:3000/api/sys/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 100
 
   shop:
     build: ./frontend-shop
     ports:
-      - "127.0.0.1:5173:5173"
+      - "127.0.0.1:5173:8080"
     environment:
       - BACKEND_URL=http://backend:3000
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run
+      - /var/cache/nginx
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 50
 
   soc:
     build: ./frontend-soc
     ports:
-      - "127.0.0.1:5174:5174"
+      - "127.0.0.1:5174:8080"
     environment:
       - BACKEND_URL=http://backend:3000
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run
+      - /var/cache/nginx
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 50
+
+volumes:
+  bugdrop-data:

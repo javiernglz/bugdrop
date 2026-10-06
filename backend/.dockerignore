@@ -1,5 +1,5 @@
+.ctf_secret
+*.db*
+data/
+.env
 node_modules
-dist
-*.db
-*.db-shm
-*.db-wal
