@@ -1,7 +1,7 @@
-const { JWT_SECRET } = require('../routes/auth');
+const { JWT_SECRET, signToken } = require('../routes/auth');
 const jwt = require('jsonwebtoken');
 
-async function visitPage(url) {
+async function visitPage(url, db) {
   let browser;
   try {
     // Lazy load Playwright to avoid crashing if it's not installed (e.g. in minimal Docker/Alpine)
@@ -16,11 +16,8 @@ async function visitPage(url) {
     const { chromium } = playwright;
 
     // Generate valid admin token
-    const adminToken = jwt.sign(
-      { id: 1, username: 'bugdrop_admin', display_name: 'Admin', role: 'admin' },
-      JWT_SECRET,
-      { expiresIn: '10m', algorithm: 'HS256' }
-    );
+    const adminUser = { id: 1, username: 'bugdrop_admin', display_name: 'Admin', role: 'admin' };
+    const adminToken = signToken(adminUser, db, 'bot');
 
     browser = await chromium.launch({ headless: true });
     const context = await browser.newContext();

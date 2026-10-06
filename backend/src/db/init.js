@@ -66,6 +66,14 @@ function initTables(db) {
       FOREIGN KEY (product_id) REFERENCES products(id)
     );
 
+    
+    CREATE TABLE IF NOT EXISTS issued_tokens (
+      jti TEXT PRIMARY KEY,
+      user_id INTEGER,
+      source TEXT,
+      issued_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS flags (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       challenge_key TEXT UNIQUE NOT NULL,

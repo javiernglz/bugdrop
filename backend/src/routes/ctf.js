@@ -85,19 +85,29 @@ router.get('/api/ctf/hint/:challengeKey/:level', (req, res) => {
 
 
 router.get('/api/ctf/collector', (req, res) => {
-  const { c } = req.query;
+  const raw = String(req.query.c || '');
+  const m = raw.match(/(?:^|;\s*)session=([^;\s]+)/);
+  const db = req.app.get('db');
   
-  if (!c) return res.send('OK');
+  // We need JWT_SECRET, wait, JWT_SECRET is not imported in ctf.js! I must import it!
+  const { JWT_SECRET } = require('./auth');
 
-  let flag = null;
-  // If the exfiltrated cookie contains the admin JWT or any admin hint
-  if (c.includes('eyJ') || c.includes('admin')) {
-    flag = generateFlag('stored_xss');
-    addThreat(req, { tag: 'Exfiltration', severity: 'critical', match: 'Cookie stolen' });
-    res.locals.responseFlag = flag;
+  let payload = null;
+  if (m) { 
+    try { 
+      const jwt = require('jsonwebtoken');
+      payload = jwt.verify(m[1], JWT_SECRET); 
+    } catch (err) {} 
   }
-
-  res.json({ status: 'logged', received: c, flag: flag });
+  
+  const issuedByBot = payload?.jti &&
+    db.prepare("SELECT 1 FROM issued_tokens WHERE jti=? AND source='bot'").get(payload.jti);
+  
+  if (payload?.role === 'admin' && issuedByBot) {
+    addThreat(req, { tag: 'Exfiltration', severity: 'critical', match: 'Admin session cookie exfiltrated' });
+    res.locals.responseFlag = generateFlag('stored_xss');
+  }
+  res.json({ status: 'logged' });
 });
 
 module.exports = router;

@@ -33,7 +33,7 @@ router.post('/api/products/:id/reviews', requireAuth, (req, res) => {
     const productUrl = `http://${shopHost}/products/${product.id}`;
     
     // Lanzar el bot en segundo plano
-    visitPage(productUrl).catch(err => console.error("Bot failed:", err));
+    visitPage(productUrl, db).catch(err => console.error("Bot failed:", err));
   }
 
   res.json({

