@@ -47,6 +47,7 @@ router.get('/api/sys/status', (req, res) => {
     status: 'operational',
     database: counts,
     uptime: process.uptime(),
+    bot: { available: require('../utils/bot').getStatus() },
     timestamp: new Date().toISOString(),
   });
 });

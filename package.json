@@ -10,7 +10,8 @@
     "dev:soc": "cd frontend-soc && npm run dev",
     "seed": "cd backend && npm run seed",
     "install:all": "npm install && cd backend && npm install && cd ../frontend-shop && npm install && cd ../frontend-soc && npm install",
-    "test": "node tests/test_challenges.js"
+    "test": "node tests/test_challenges.js",
+    "test:bot": "node tests/test_bot.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
