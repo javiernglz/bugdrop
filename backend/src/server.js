@@ -44,7 +44,7 @@ const checkEmpty = db.prepare('SELECT COUNT(*) as count FROM products').get().co
 if (checkEmpty === 0) {
   console.log('⚠️  Database is empty. Auto-seeding initial data...');
   try {
-    require('child_process').execSync('npm run seed', { 
+    require('child_process').execSync('node src/db/seed.js', { 
       stdio: 'inherit', 
       cwd: require('path').resolve(__dirname, '..') 
     });

@@ -4,14 +4,15 @@ WORKDIR /app
 
 # Create /data and set ownership to pwuser before switching, 
 # so Docker's named volume inherits the correct permissions.
-RUN mkdir /data && chown pwuser:pwuser /data
+# Also chown /app so pwuser can run npm ci and create node_modules.
+RUN mkdir /data && chown pwuser:pwuser /data && chown pwuser:pwuser /app
 
 COPY --chown=pwuser:pwuser package*.json ./
+
+USER pwuser
 RUN npm ci --omit=dev
 
 COPY --chown=pwuser:pwuser . .
-
-USER pwuser
 
 EXPOSE 3000
 
