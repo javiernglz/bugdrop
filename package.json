@@ -15,7 +15,7 @@
     "test:bot": "node tests/test_bot.js"
   },
   "devDependencies": {
-    "@playwright/test": "1.43.0",
+    "@playwright/test": "1.63.0",
     "concurrently": "^9.1.2",
     "jsonwebtoken": "^9.0.3",
     "socket.io-client": "^4.8.4"
