@@ -99,7 +99,20 @@ setInterval(() => {
     const recent = hits.filter(t => now - t < 10000);
     recent.length ? fuzzingTracker.set(ip, recent) : fuzzingTracker.delete(ip);
   }
+  
+
 }, 10000).unref();
+
+setInterval(() => {
+  const db = app.get('db');
+  if (db) {
+    try {
+      db.prepare("DELETE FROM issued_tokens WHERE datetime(issued_at) < datetime('now', '-1 day')").run();
+    } catch(err) {
+      console.error('[SOC] Error cleaning up issued_tokens:', err.message);
+    }
+  }
+}, 3600000).unref();
 
 app.use((req, res, next) => {
   const ip = req.ip || '127.0.0.1';

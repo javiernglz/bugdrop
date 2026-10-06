@@ -11,7 +11,18 @@ function getUserFromToken(req) {
 
   
   try {
-    return verifyToken(token);
+    const payload = verifyToken(token);
+    const db = req.app?.get('db'); console.log('DB EXISTS:', !!db);
+    if (db && payload.jti) {
+      const row = db.prepare('SELECT user_id FROM issued_tokens WHERE jti=?').get(payload.jti);
+      const user = payload.id ? db.prepare('SELECT role FROM users WHERE id=?').get(payload.id) : null;
+      if (!row || row.user_id !== payload.id || !user || payload.role !== user.role) {
+        addThreat(req, { tag: 'Forged JWT', severity: 'critical', match: 'Invalid JTI/User/Role mapping' });
+      }
+    } else if (db && !payload.jti) { console.log('TRIGGERING MISSING JTI ALERT');
+      addThreat(req, { tag: 'Forged JWT', severity: 'critical', match: 'Token missing JTI' });
+    }
+    return payload;
   } catch (err) {
     if (err.name === 'JsonWebTokenError' && err.message === 'invalid signature') {
       addThreat(req, { tag: 'Forged JWT', severity: 'critical', match: 'Invalid signature detected' });

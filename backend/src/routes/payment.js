@@ -70,8 +70,15 @@ router.post('/api/orders/:id/pay', requireAuth, (req, res) => {
   });
 });
 
-router.get('/api/orders/:id/payment-info', (req, res) => {
+router.get('/api/orders/:id/payment-info', requireAuth, (req, res) => {
   const db = req.app.get('db');
+  const user = req.user;
+  const orderInfo = db.prepare('SELECT user_id FROM orders WHERE id = ?').get(req.params.id);
+  if (orderInfo && orderInfo.user_id !== user.id && user.role !== 'admin') {
+    addThreat(req, { tag: 'IDOR', severity: 'high', match: 'Attempted to access payment-info of another user' });
+    return res.status(403).json({ error: 'Forbidden. This is not your order.' });
+  }
+
   const order = db.prepare('SELECT id, total_price, payment_status FROM orders WHERE id = ?').get(req.params.id);
 
   if (!order) {

