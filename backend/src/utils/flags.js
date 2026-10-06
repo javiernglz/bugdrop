@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-const secretPath = path.join(__dirname, '..', '..', '.ctf_secret');
+const secretPath = process.env.DATA_DIR ? path.join(process.env.DATA_DIR, '.ctf_secret') : path.join(__dirname, '..', '..', '.ctf_secret');
 
 let INSTANCE_SECRET;
 
