@@ -37,22 +37,12 @@ export default function PanicButton({ onResetCtf }) {
 
   return (
     <div className="p-5 panel-base border-[var(--error)]/20 bg-[var(--error)]/5">
-      <div className="flex items-center gap-2 mb-2">
-        <AlertTriangle size={16} className="text-[var(--error)]" />
-        <h3 className="text-[11px] font-bold text-[var(--error)] uppercase tracking-widest m-0">
-          Panic Button
-        </h3>
-      </div>
-      <p className="text-xs text-[var(--text-muted)] mb-4 leading-relaxed">
-        Wipes the database, restarts the backend seed, and resets your CTF progress permanently.
-      </p>
-      
       <motion.button
         whileHover={!resetting ? { scale: 1.02 } : {}}
         whileTap={!resetting ? { scale: 0.98 } : {}}
         onClick={handleReset}
         disabled={resetting}
-        className={`w-full py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm ${
+        className={`w-full mb-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2 ${
           resetting
             ? 'bg-[var(--border)] text-[var(--text-faint)] cursor-wait'
             : confirming
@@ -60,18 +50,23 @@ export default function PanicButton({ onResetCtf }) {
               : 'bg-transparent border border-[var(--error)]/50 text-[var(--error)] hover:bg-[var(--error)] hover:text-white'
         }`}
       >
+        {!resetting && !confirming && <AlertTriangle size={14} />}
         {resetting
-          ? 'Resetting...'
+          ? 'Restoring...'
           : confirming
-            ? 'Confirm Wipe?'
-            : 'Reset Environment'}
+            ? 'Confirm Restore?'
+            : 'Mini SOC Restore'}
       </motion.button>
+
+      <p className="text-xs text-[var(--text-muted)] leading-relaxed m-0 text-center">
+        Wipes the database, restarts the backend seed, and resets your CTF progress permanently.
+      </p>
 
       {result && (
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`mt-3 rounded-lg px-3 py-2 text-[10px] font-mono border ${
+          className={`mt-4 rounded-lg px-3 py-2 text-[10px] font-mono border text-center ${
           result.ok
             ? 'bg-[var(--success)]/10 border-[var(--success)]/30 text-[var(--success)]'
             : 'bg-[var(--error)]/10 border-[var(--error)]/30 text-[var(--error)]'

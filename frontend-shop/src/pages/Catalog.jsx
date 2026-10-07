@@ -28,6 +28,7 @@ const RARITY_COLOR = {
   'Common':     { bg: '#f0f0f0', text: '#6b6b6b', dark_bg: '#2a2a2a', dark_text: '#8a8a8a' },
   'Rare':       { bg: '#e8f4ff', text: '#2563eb', dark_bg: '#1e3a5f', dark_text: '#60a5fa' },
   'Ultra Rare': { bg: '#f5e8ff', text: '#7c3aed', dark_bg: '#3b1f5f', dark_text: '#a78bfa' },
+  'Limited':    { bg: '#fee2e2', text: '#dc2626', dark_bg: '#450a0a', dark_text: '#f87171' },
   'Secret':     { bg: '#fff8e8', text: '#b45309', dark_bg: '#3d2800', dark_text: '#fbbf24' },
 };
 
@@ -173,9 +174,8 @@ export default function Catalog() {
                   <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
                     {formatPrice(product.price)}
                   </span>
-                  {product.featured === 1 && (
-                    <RarityBadge rarity="Secret" />
-                  )}
+                  {product.category === 'secret' && <RarityBadge rarity="Secret" />}
+                  {product.category === 'limited' && <RarityBadge rarity="Limited" />}
                 </div>
               </div>
             </Link>

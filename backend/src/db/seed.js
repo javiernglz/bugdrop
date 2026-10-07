@@ -54,17 +54,17 @@ function runSeed(dbInstance = null) {
     `);
 
     const products = [
-      ['Bug Hacker', 'Dark hoodie, glowing green eyes, and a laptop covered in stickers. Series 01 · Ultra Rare.', 99, 'series-01', '🐛', 10, 1],
+      ['Bug Hacker', 'Dark hoodie, glowing green eyes, and a laptop covered in stickers. Series 01 · Ultra Rare.', 99, 'limited', '🐛', 10, 1],
       ['Bug Aviator', 'Vintage leather jacket and pilot goggles. Always looking at the sky. Series 01 · Rare.', 49, 'series-01', '🐛', 60, 0],
       ['Bug Robot', 'Titanium chassis, precise calculations, zero emotions. Series 01 · Rare.', 49, 'series-01', '🐛', 30, 0],
       ['Bug Firefighter', 'Bright yellow coat and a tiny red helmet. Saves the day, every day. Series 01 · Common.', 29, 'series-01', '🐛', 150, 0],
-      ['Bug Astronaut', 'Pressurized suit with a tiny golden visor. Ready for the moon. Series 01 · Rare.', 49, 'series-01', '🐛', 25, 1],
+      ['Bug Astronaut', 'Pressurized suit with a tiny golden visor. Ready for the moon. Series 01 · Rare.', 49, 'limited', '🐛', 25, 1],
       ['Bug Chef', 'An 8-inch knife, leather apron, and a recipe nobody else knows. Series 01 · Common.', 29, 'series-01', '🐛', 100, 0],
       ['Bug Detective', 'Sees everything. Knows everything. Never tells you how. Polished magnifying glass included. Series 01 · Rare.', 49, 'series-01', '🐛', 55, 0],
       ['Bug Scientist', 'White lab coat, safety goggles, and three failed experiments a day. Very promising. Series 01 · Common.', 29, 'series-01', '🐛', 115, 0],
       ['Bug Cowboy', 'Wide-brimmed hat, silver spurs, and a stare that needs no words. Series 01 · Common.', 29, 'series-01', '🐛', 120, 0],
-      ['Bug Samurai', 'Black lacquered armor, twin-blade katana, and a discipline the other Bugs cannot comprehend. Series 01 · Rare.', 49, 'series-01', '🐛', 45, 0],
-      ['Bug Wizard', 'Starry cape, crystal wand, and a hat from which things emerge that are better left unquestioned. Series 01 · Rare.', 49, 'series-01', '🐛', 50, 0],
+      ['Bug Samurai', 'Black lacquered armor, twin-blade katana, and a discipline the other Bugs cannot comprehend. Series 01 · Rare.', 49, 'limited', '🐛', 45, 0],
+      ['Bug Wizard', 'Starry cape, crystal wand, and a hat from which things emerge that are better left unquestioned. Series 01 · Rare.', 49, 'limited', '🐛', 50, 0],
       ['Bug ???', '???', 999, 'secret', '🐛', 1, 1],
     ];
 

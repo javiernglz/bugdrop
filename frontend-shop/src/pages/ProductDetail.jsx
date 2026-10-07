@@ -125,7 +125,7 @@ export default function ProductDetail() {
             display: 'inline-block', fontSize: '11px', fontWeight: 500, letterSpacing: '0.1em',
             textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '12px'
           }}>
-            {product.category === 'secret' ? 'Secret Drop' : 'Series 01'}
+            {product.category === 'secret' ? 'Secret Drop' : product.category === 'limited' ? 'Limited Edition' : 'Series 01'}
           </span>
           
           <h1 style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.1, marginBottom: '16px', letterSpacing: '-0.02em' }}>
