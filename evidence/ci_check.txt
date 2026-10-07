@@ -1,0 +1,2 @@
+73:          node tests/soc_coverage.js
+97:          node tests/soc_coverage.js

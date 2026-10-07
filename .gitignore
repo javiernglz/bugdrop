@@ -21,3 +21,6 @@ data/
 *.db-wal
 commits.txt
 evidence/
+.DS_Store
+*.bak
+*.zip

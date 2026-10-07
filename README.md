@@ -26,13 +26,13 @@ Bugdrop is an intentionally vulnerable e-commerce platform and SOC (Security Ope
 - `HINT_LEVEL2_DELAY_SECONDS`: Delay in seconds for level 2 hints (e.g. 3).
 
 ## Test Accounts
-The following accounts are available for testing:
+The following collector accounts are seeded for testing:
 | Username | Password | Role |
 |----------|----------|------|
-| `admin`  | `admin123` | Administrator |
-| `user1`  | `user123` | Regular User |
-| `user2`  | `user123` | Regular User |
-| `demo`   | `demo123` | Regular User |
+| `collector_42`  | `bugdrop2024` | Verified Buyer |
+| `lady_caos`     | `caos123`     | Rarest drops only |
+| `prof_doom`     | `doom_rules`  | Material Analyst |
+| `cyber_ninja`   | `ghost_in_shell` | Elusive Collector |
 
 ## XSS Challenge Architecture
 The XSS challenge involves stealing the admin session:
