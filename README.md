@@ -69,7 +69,10 @@ docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build --
 - **Bot not available**: Check `/api/sys/status`. Ensure Playwright Chromium is installed or Chromium limits aren't hit.
 - **How to reset**: Use the `Reset` button in the UI or call `/api/sys/reset` with the `ALLOW_RESET` header.
 
-<!-- TODO(humano): captura/GIF -->
+## Screenshots
+![Shop Catalog](docs/screenshots/shop.jpg)
+![Product Detail](docs/screenshots/product.jpg)
+![SOC Dashboard](docs/screenshots/soc.jpg)
 
 ## License
 MIT License
